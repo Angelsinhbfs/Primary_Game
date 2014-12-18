@@ -6,6 +6,6 @@ namespace Assets.Scripts.Core
 {
     interface IDamageable
     {
-        void TakeDamage(int Dmg);
+        void TakeDamage(int Dmg, PrimaryEnums.Color color);
     }
 }

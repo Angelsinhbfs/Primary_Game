@@ -43,6 +43,7 @@ namespace Assets.Scripts.Core
                 {
                     GameObject n = (GameObject)Instantiate(PooledObject);
                     Pool.Add(n);
+                    n.SetActive(false);
                     return n; 
                 }
             }

@@ -3,24 +3,13 @@ using System.Collections;
 
 namespace Assets.Scripts.Core
 {
-    public class Entity : MonoBehaviour, IDamageable
+    public class Entity : MonoBehaviour
     {
-        public int HP;
+        protected int HP;
         public float MaxSpeed;
         public float Acceleration;
         public int PointValue;
         public PrimaryEnums.LockOn Locked = PrimaryEnums.LockOn.None;
-
-        // Update is called once per frame
-        void Update()
-        {
-            Move();
-        }
-
-        public virtual void Move()
-        {
-
-        }
 
         public virtual void OnCollisionEnter2D(Collision2D c)
         {
@@ -28,12 +17,17 @@ namespace Assets.Scripts.Core
         }
 
 
-        public void TakeDamage(int dmg)
+        public virtual void TakeDamage(int dmg, PrimaryEnums.Color color, GameObject Owner)
         {
-            HP -= dmg;
+            //HP -= dmg;
             if (HP <=0)
             {
                 Kill();
+                if (Owner.GetComponent<Player.Player>() != null)
+                {
+                    Owner.GetComponent<Player.Player>().Score = PointValue;
+                    Owner.GetComponent<Player.Player>().Kills++;
+                }
             }
         }
         public void TakeDamage(int dmg, GameObject Owner)
@@ -42,10 +36,7 @@ namespace Assets.Scripts.Core
             if (HP <= 0)
             {
                 Kill();
-                if (Owner.GetComponent<Player.Player>() != null)
-                {
-                    Owner.GetComponent<Player.Player>().Score = PointValue; 
-                }
+                
             }
         }
 

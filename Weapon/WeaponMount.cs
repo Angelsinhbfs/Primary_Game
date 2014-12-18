@@ -38,6 +38,7 @@ namespace Assets.Scripts.Weapon
             switch (fireDir)
             {
                 case PrimaryEnums.FireDir.Front:
+                    //b.rigidbody2D.velocity += Owner.rigidbody2D.velocity;
                     break;
                 case PrimaryEnums.FireDir.Left:
                     b.SetActive(true);

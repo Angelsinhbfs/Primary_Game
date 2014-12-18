@@ -38,10 +38,12 @@ namespace Assets.Scripts.Core
 
         void OnTriggerEnter2D(Collider2D c)
         {
+            //Debug.Log(c.name);
+            //Debug.Log(c);
             if (c.gameObject.transform.root.gameObject == Owner) return;
 
             if (c.gameObject.tag != "Terrain" && c.gameObject.tag != "Bullet")
-               c.gameObject.GetComponent<Entity>().TakeDamage(Damage,Owner); 
+               c.gameObject.GetComponent<Entity>().TakeDamage(Damage,color, Owner); 
 
             if (!Piercing)
             {

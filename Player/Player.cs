@@ -4,20 +4,24 @@ using Assets.Scripts.Core;
 using System.Collections.Generic;
 using Assets.Scripts.Weapon;
 using Assets.Scripts.Utility;
+using Assets.Scripts.Enemy;
 
 namespace Assets.Scripts.Player
 {
     public class Player : Entity
     {
-        
+        #region variables
         //functional stats
         public int MaxHp;
         public Vector2 Speed;
         public float FireRate;
         public bool isPlayerOne;
+        public int InvulnerableTime;
+        private bool paused;
 
         public bool isRespawning = false;
-
+        private PolygonCollider2D collider;
+        private SpriteRenderer shipRend;
         //weapon variables
         public List<GameObject> Weapons;
         public int SelectedWeapon = 0;
@@ -35,6 +39,7 @@ namespace Assets.Scripts.Player
         private bool isSwitching = false;
         private Vector2 stickVector;
         public float drag;
+        public Vector2[] Borders;
 
         public Rigidbody2D me;
 
@@ -47,11 +52,56 @@ namespace Assets.Scripts.Player
         public Hud1Player HUD;
         public Shield shield;
 
+        //shield stats
+        public bool shieldActive = true;
+        public int MaxShieldHp;
+        public int RedHp;
+        public int BlueHp;
+        public int YellowHp;
+        #endregion
+        public int HPShields
+        {
+            get { return HP; }
+            set
+            {
+                if (shieldActive)
+                {
+                    switch (color)
+                    {
+                        case PrimaryEnums.Color.Yellow:
+                            YellowHp += value;
+                            if (YellowHp > MaxShieldHp) YellowHp = MaxShieldHp;
+                            break;
+                        case PrimaryEnums.Color.Red:
+                            RedHp += value;
+                            if (RedHp > MaxShieldHp) RedHp = MaxShieldHp;
+                            break;
+                        case PrimaryEnums.Color.Blue:
+                            //Debug.Log("shield hit");
+                            BlueHp += value;
+                            if (BlueHp > MaxShieldHp) BlueHp = MaxShieldHp;
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                else
+                {
+                    HP += value;
+                }
+            }
+        }
+
 
         private int _score = 0;
         public int Score { get { return _score; } set { _score += value; } }
        
         // Use this for initialization
+        void Awake()
+        {
+            collider = GetComponent<PolygonCollider2D>();
+            shipRend = GetComponentInChildren<SpriteRenderer>();
+        }
         void Start()
         {
             //player controller selection
@@ -66,6 +116,12 @@ namespace Assets.Scripts.Player
 
             HUD = GameObject.FindGameObjectWithTag("Hud").GetComponent<Hud1Player>();
 
+            RedHp = MaxShieldHp;
+            BlueHp = MaxShieldHp;
+            YellowHp = MaxShieldHp;
+
+            collider = GetComponent<PolygonCollider2D>();
+
 
         }
         void OnEnable()
@@ -73,13 +129,66 @@ namespace Assets.Scripts.Player
             Target = null;
             rigidbody2D.velocity = Vector2.zero;
             HP = MaxHp;
+            StartCoroutine(invulnToggle(InvulnerableTime));
         }
 
         // Update is called once per frame
         void Update()
         {
-            HandleInput();
-            UpdateScore();
+            if (!paused)
+            {
+                HandleInput();
+                UpdateScore();
+                HandleShield(); 
+            }
+            
+        }
+
+        private void HandleShield()
+        {
+            switch (color)
+            {
+                case PrimaryEnums.Color.Yellow:
+                    if (YellowHp <= 0)
+                    {
+                        shield.gameObject.SetActive(false);
+                        shieldActive = false;
+                    }
+                    else
+                    {
+                        shield.gameObject.SetActive(true);
+                        shieldActive = true;
+                    }
+                    break;
+                case PrimaryEnums.Color.Red:
+                    if (RedHp <= 0)
+                    {
+                        shield.gameObject.SetActive(false);
+                        shieldActive = false;
+                    }
+                    else
+                    {
+                        shield.gameObject.SetActive(true);
+                        shieldActive = true;
+                    }
+                    break;
+                case PrimaryEnums.Color.Blue:
+                    if (BlueHp <= 0)
+                    {
+                        shield.gameObject.SetActive(false);
+                        shieldActive = false;
+                    }
+                    else
+                    {
+                        shield.gameObject.SetActive(true);
+                        shieldActive = true;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
+            
         }
 
         private void UpdateScore()
@@ -106,6 +215,8 @@ namespace Assets.Scripts.Player
             if (Speed.y > MaxSpeed) Speed.y = MaxSpeed;
             me.velocity = Speed;
             Speed *= drag;
+            transform.position = new Vector2(Mathf.Clamp(transform.position.x, Borders[0].x, Borders[2].x), Mathf.Clamp(transform.position.y, Borders[3].y, Borders[1].y));
+            
             #endregion
 
             #region rotation
@@ -190,7 +301,7 @@ namespace Assets.Scripts.Player
                 SelectedWeapon = 0;
             }
             if ((int)++color == PrimaryEnums.Color.GetValues(typeof(PrimaryEnums.Color)).Length) color = PrimaryEnums.Color.Yellow;
-            shield.SetColor(color);
+            
         }
 
         public void Fire()
@@ -223,13 +334,54 @@ namespace Assets.Scripts.Player
                 return;
             }
         }
-        
+
+        public override void TakeDamage(int dmg, PrimaryEnums.Color Color, GameObject Owner)
+        {
+            if (shieldActive && Color == color)
+            {
+                //Debug.Log("Shield boost triggered");
+                HPShields = dmg;
+            }
+            else
+            {
+                //Debug.Log("shield hit");
+                HPShields = -dmg;
+            }
+            base.TakeDamage(dmg, Color, Owner);
+        }
         public override void Kill()
         {
             CancelInvoke("Fire");
             isFireing = false;
             gameObject.SetActive(false);
+            Deaths++;
 
+        }
+
+        IEnumerator invulnToggle(int seconds)
+        {
+            collider.enabled = !collider.enabled;
+            yield return StartCoroutine(Flash((float)seconds/12f,seconds)); 
+            collider.enabled = true;
+        }
+
+        IEnumerator Flash(float speed, int seconds)
+        {
+            yield return new WaitForSeconds(speed);
+            shipRend.enabled = !shipRend.enabled;
+            yield return new WaitForSeconds(speed);
+            shipRend.enabled = !shipRend.enabled;
+            if (seconds-- > 0)
+            {
+                yield return StartCoroutine(Flash(speed, seconds));
+            }
+
+        }
+
+        public void OnPause()
+        {
+            paused = true;
+            rigidbody2D.velocity = Vector2.zero;
         }
     }
 }

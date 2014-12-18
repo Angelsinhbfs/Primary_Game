@@ -28,6 +28,7 @@ namespace Assets.Scripts.Utility
         #endregion
         public void OnEnable()
         {
+            Screen.orientation = ScreenOrientation.Landscape;
             //We cache the Hash to the "Open" Parameter, so we can feed to Animator.SetBool.
             m_OpenParameterId = Animator.StringToHash(k_OpenTransitionName);
 
@@ -142,7 +143,12 @@ namespace Assets.Scripts.Utility
         void Update()
         {
             //non player input handling
-            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel != 0) Application.LoadLevel(0);
+            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel != 0)
+            {
+                Time.timeScale = 1f;
+                Application.LoadLevel(0);
+            }
+            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel == 0) Application.Quit();
         }
     }
 }

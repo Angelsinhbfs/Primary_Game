@@ -13,42 +13,49 @@ namespace Assets.Scripts.Enemy
         public PrimaryEnums.AiState State = PrimaryEnums.AiState.Wander;
         public PrimaryEnums.Color color;
         public int MaxHp;
-        public int Speed;
+        public float Speed;
 
         public GameObject Target;
+        public Vector3 moveToPos;
+
+        private bool paused;
+
+
+        #region pathfinding
         public List<Transform> PatrolPoints;
         public TargettingField tField;
         private bool isPointsCollected = false;
-
-        private Seeker seeker;
+        protected PolyNavAgent agent;
 
         //The calculated path
         public Path path;
+        private int currentPatrolPoint;
+        #endregion
 
-        //The max distance from the AI to a waypoint for it to continue to the next waypoint
-        public float nextWaypointDistance = 6;
-
-        //The waypoint we are currently moving towards
-        private int currentWaypoint = 0;
-
-        private int currentPatrolPoint = 0;
-
-        public float repathRate = 0.5f;
-        private float lastRepath = -9999;
+        #region ai behavior
+        //attack state triggers
+        public float minAttackDistance;
+        public float maxAttackDistance;
+        public bool isAttacking;
+        public bool isStationaryAttacker;
+        public Vector3 TargetTrackingOffset;
+        private Vector3 TargetPos, oldTargetPos;
+        protected bool dirtyPath = false;
+        #endregion
 
         // Use this for initialization
         public void Start()
         {
             BuildPatrolPoints();
             //Debug.Log(PatrolPoints);
-            seeker = GetComponent<Seeker>();
+            agent = GetComponent<PolyNavAgent>();
             PatrolPoints = StaticUtilities.ShuffleWaypointList(PatrolPoints);
 
-            seeker.StartPath(transform.position, PatrolPoints[0].position, OnPathComplete);
+            agent.SetDestination(PatrolPoints[0].position);
             currentPatrolPoint++;
         }
 
-        private void BuildPatrolPoints()
+        protected void BuildPatrolPoints()
         {
             var t = GameObject.FindGameObjectsWithTag("PatrolPoint");
             //Debug.Log(t.Length);
@@ -66,88 +73,128 @@ namespace Assets.Scripts.Enemy
             InvokeRepeating("AssessTarget", 0.1f, 0.5f);
         }
 
-        public override void Move()
+        public virtual void FixedUpdate()
         {
-            if (!isPointsCollected) return;
-            if (currentPatrolPoint == PatrolPoints.Count) currentPatrolPoint = 0;
-            
+            if(!paused)
+                doLogic();
+        }
+        protected void doLogic()
+        {
+            AssessTarget();
+            if (Target != null)
+            {
+                if (!Target.activeInHierarchy) State = PrimaryEnums.AiState.Wander;
+                if (Vector2.Distance(transform.position, Target.transform.position) <= minAttackDistance)
+                    State = PrimaryEnums.AiState.Attack;
+                else if (State == PrimaryEnums.AiState.Attack && Vector2.Distance(transform.position, Target.transform.position) >= maxAttackDistance)
+                    State = PrimaryEnums.AiState.Follow;
+                else if (State != PrimaryEnums.AiState.Attack && Vector2.Distance(transform.position, Target.transform.position) > minAttackDistance)
+                    State = PrimaryEnums.AiState.Follow;
+            }
+            else
+                State = PrimaryEnums.AiState.Wander;
+
             switch (State)
             {
                 case PrimaryEnums.AiState.Wander:
-                    if (path == null) return;
-                    if (currentWaypoint > path.vectorPath.Count) return;
-                    if (currentWaypoint == path.vectorPath.Count)
-                    {
-                        //Debug.Log("End Of Path Reached");
-                        currentWaypoint++;
-                        seeker.StartPath(transform.position, PatrolPoints[currentPatrolPoint].position, OnPathComplete);
-                        currentPatrolPoint++;
-                        return;
-                    }
-                    var cw = currentWaypoint  < path.vectorPath.Count ? currentWaypoint : currentWaypoint - 1;
-                    transform.rotation = StaticUtilities.XYLookRotation(transform.position, path.vectorPath[cw]);
-                    //transform.position =  path.vectorPath[cw];
-                    rigidbody2D.velocity = transform.up * Speed / 2;
+                    Speed =(int)( MaxSpeed * 0.5f);
+                    agent.maxSpeed = Speed;
+                    TargetPos = PatrolPoints[currentPatrolPoint].position;
+                    CheckPath(TargetPos);
                     break;
                 case PrimaryEnums.AiState.Follow:
-                    if (Time.time - lastRepath > repathRate && seeker.IsDone())
+                    Speed = (int)MaxSpeed;
+                    agent.maxSpeed = Speed;
+                    TargetPos = Target.transform.TransformPoint(TargetTrackingOffset);
+                    CheckPath(TargetPos);
+                    break;
+                case PrimaryEnums.AiState.Attack:
+                    if (!isAttacking)
                     {
-                        lastRepath = Time.time + Random.value * repathRate * 0.5f;
-                        seeker.StartPath(transform.position, Target.transform.position, OnPathComplete);
+                        Attack();
+                        isAttacking = true;
                     }
+                    if (!isStationaryAttacker)
+                    {
+                        Speed = (int)MaxSpeed;
+                        agent.maxSpeed = Speed;
+                        TargetPos = Target.transform.TransformPoint(TargetTrackingOffset);
+                        CheckPath(TargetPos);
+                    }
+                    else
+                        agent.Stop();
 
-                    if (path == null) return;
-                    if (currentWaypoint > path.vectorPath.Count) return;
-                    if (currentWaypoint == path.vectorPath.Count)
-                    {
-                        //Debug.Log("End Of Path Reached");
-                        currentWaypoint++;
-                        seeker.StartPath(transform.position, Target.transform.position, OnPathComplete);
-                    }
-                    //rigidbody2D.velocity = transform.up * Speed;
-                    transform.rotation =  StaticUtilities.XYLookRotation(transform.position, path.vectorPath[currentWaypoint]);
-                    rigidbody2D.velocity = transform.up * Speed;
-                    //transform.position = Vector3.Lerp(transform.position, path.vectorPath[currentWaypoint], Speed * Time.deltaTime);
                     break;
                 default:
                     break;
             }
-            if ((transform.position - path.vectorPath[currentWaypoint]).sqrMagnitude < nextWaypointDistance * nextWaypointDistance)
-            {
-                //Debug.Log("waypoint reached");
-                currentWaypoint++;
-                return;
-            }
-            
         }
 
-        public void OnPathComplete(Path p)
+        private void Rotate()
         {
-            p.Claim(this);
-            if (!p.error)
+            transform.rotation = StaticUtilities.XYLookRotation(transform.position, moveToPos);
+        }
+
+        protected virtual void Attack()
+        {
+            throw new System.NotImplementedException();
+        }
+
+        private void CheckPath(Vector3 point)
+        {
+             //builds patrol path and wanders
+            if (!isPointsCollected) return;
+            if (point != oldTargetPos || agent.activePath.Count == 0)
             {
-                if (path != null) path.Release(this);
-                path = p;
-                //Reset the waypoint counter
-                currentWaypoint = 0;
+                agent.SetDestination(point);
+                oldTargetPos = point;
             }
-            else
+            else if (State == PrimaryEnums.AiState.Wander && agent.remainingDistance < 1)
             {
-                p.Release(this);
-                Debug.Log("Oh noes, the target was not reachable: " + p.errorLog);
+                currentPatrolPoint++;
+                if (currentPatrolPoint == PatrolPoints.Count) currentPatrolPoint = 0;
             }
         }
 
-        
-
-        void AssessTarget()
+        protected void offPathMove()
         {
-            //Target = tField.Targets[0];
+            rigidbody2D.velocity += (Vector2)transform.up * Speed;
+            rigidbody2D.velocity = Vector3.Normalize(new Vector3(rigidbody2D.velocity.x, rigidbody2D.velocity.y)) * Speed;
+        }
+
+        public override void TakeDamage(int dmg, PrimaryEnums.Color color, GameObject Owner)
+        {
+            HP -= dmg;
+            if (Target == null) Target = Owner;
+            base.TakeDamage(dmg, color, Owner);
+        }
+
+        public void OnDestinationReached()
+        {
+            if (State == PrimaryEnums.AiState.Wander)
+            {
+                currentPatrolPoint++;
+                if (currentPatrolPoint == PatrolPoints.Count) currentPatrolPoint = 0;
+                if (Vector3.Distance(transform.position, PatrolPoints[currentPatrolPoint].transform.position) < 1f) currentPatrolPoint++;
+                if (currentPatrolPoint == PatrolPoints.Count) currentPatrolPoint = 0;
+                agent.SetDestination(PatrolPoints[currentPatrolPoint].transform.position);
+            }
+            //else
+            //    AssessTarget();
+            //if(Target == null)
+            //{
+            //    currentPatrolPoint++;
+            //    if (currentPatrolPoint == PatrolPoints.Count) currentPatrolPoint = 0;
+            //    agent.SetDestination(PatrolPoints[currentPatrolPoint].transform.position);
+            //}
+        }
+
+        protected void AssessTarget()
+        {
             if(Target != null)
                 Target = Target.activeInHierarchy ? Target : null;
             else
                 Target = tField.Targets.Count > 0 ? tField.Targets[0] : null;
-            State = Target == null ? PrimaryEnums.AiState.Wander : PrimaryEnums.AiState.Follow;
         }
 
         public override void Kill()
@@ -158,7 +205,7 @@ namespace Assets.Scripts.Enemy
 
         public override void OnCollisionEnter2D(Collision2D c)
         {
-            string t = c.collider.tag;
+            string t = c.gameObject.tag;
             if (t == "Terrain")
             {
                 rigidbody2D.velocity = -rigidbody2D.velocity;
@@ -167,22 +214,25 @@ namespace Assets.Scripts.Enemy
 
             var v = rigidbody2D.velocity;
             rigidbody2D.velocity = c.gameObject.rigidbody2D.velocity;
-            c.gameObject.rigidbody2D.velocity = v;
+            c.gameObject.rigidbody2D.velocity = 2*v;
 
             if(t == "Player")
             {
-                Debug.Log("player hit");
-                c.gameObject.GetComponent<Entity>().TakeDamage(50);
-                TakeDamage(50);
+                c.gameObject.GetComponent<Entity>().TakeDamage(50, color, gameObject);
+                TakeDamage(50, color, gameObject);
             }
 
-            if (t == "Shield")
-            {
-                Debug.Log("Shield hit");
-                c.gameObject.GetComponentInChildren<Shield>().TakeDamage(50, color);
-                TakeDamage(50);
-            }
+        }
 
+        public void OnPause()
+        {
+            paused = true;
+            rigidbody2D.velocity = Vector2.zero;
+        }
+
+        public void OnUnpause()
+        {
+            paused = false;
         }
     }
 }

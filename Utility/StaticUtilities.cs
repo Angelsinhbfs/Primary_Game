@@ -1,4 +1,5 @@
 ﻿
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -28,6 +29,12 @@ namespace Assets.Scripts.Utility
             var d = vectorB - vectorA;
             var a = Mathf.Atan2(d.y, d.x) * Mathf.Rad2Deg - 90;
             return Quaternion.AngleAxis(a, Vector3.forward);
+        }
+
+        public static IEnumerator Wait(float duration)
+        {
+            for (float timer = 0; timer < duration; timer += Time.deltaTime)
+                yield return 0;
         }
     }
 }

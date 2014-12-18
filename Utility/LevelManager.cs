@@ -15,9 +15,5 @@ namespace Assets.Scripts.Utility
             Application.Quit();
         }
 
-        public void goWin()
-        {
-
-        }
     }
 }

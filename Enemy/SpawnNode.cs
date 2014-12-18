@@ -32,8 +32,14 @@ namespace Assets.Scripts.Enemy
         }
         public override void OnCollisionEnter2D(Collision2D c)
         {
-            c.gameObject.GetComponent<Entity>().TakeDamage(25);
-            TakeDamage(25);
+            //c.gameObject.GetComponent<Entity>().TakeDamage(25);
+            //TakeDamage(25);
+        }
+
+        public override void TakeDamage(int dmg, PrimaryEnums.Color color, GameObject Owner)
+        {
+            HP -= dmg;
+            base.TakeDamage(dmg, color, Owner);
         }
 
         public override void Kill()

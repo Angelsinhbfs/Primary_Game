@@ -67,6 +67,8 @@ namespace Assets.Scripts.Weapon
         {
             if (c.gameObject == Owner) return;
             if (c.gameObject.tag == "Terrain") return;
+            //Debug.Log(c.name);
+            //Debug.Log(c);
             c.GetComponent<Entity>().TakeDamage((int)CumulativeDmg, Owner);
             CumulativeDmg = 0;
         }
