@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Assets.Tools.Ferr._2DTerrain.Scripts;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -43,7 +44,10 @@ namespace Assets.Scripts.Core
             if (c.gameObject.transform.root.gameObject == Owner) return;
 
             if (c.gameObject.tag != "Terrain" && c.gameObject.tag != "Bullet")
-               c.gameObject.GetComponent<Entity>().TakeDamage(Damage,color, Owner); 
+               c.gameObject.GetComponent<Entity>().TakeDamage(Damage,color, Owner);
+
+            if (c.gameObject.tag == "Terrain")
+                c.GetComponent<BaseDestructibleScript>().onCollision(gameObject);
 
             if (!Piercing)
             {

@@ -129,6 +129,9 @@ namespace Assets.Scripts.Player
             Target = null;
             rigidbody2D.velocity = Vector2.zero;
             HP = MaxHp;
+            RedHp = MaxShieldHp;
+            YellowHp = MaxShieldHp;
+            BlueHp = MaxShieldHp;
             StartCoroutine(invulnToggle(InvulnerableTime));
         }
 
