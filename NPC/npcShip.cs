@@ -33,7 +33,7 @@ namespace Assets.Scripts.NPC
 
         public virtual void Update()
         {
-            //check to see if paths have been opened up and ship[ should proceed
+            //check to see if paths have been opened up and ship should proceed
 
         }
 
@@ -66,7 +66,7 @@ namespace Assets.Scripts.NPC
         public void OnDestinationReached()
         {
             //get the next waypoint if current position equals waypoint position
-            if((transform.position - WayPoints[currWaypoint].position).magnitude <= Mathf.Epsilon) currWaypoint++;
+            if((transform.position - WayPoints[currWaypoint].position).magnitude <= 1f) currWaypoint++;
 
             //if there are no more waypoints then wait
             if (currWaypoint == WayPoints.Count) return;

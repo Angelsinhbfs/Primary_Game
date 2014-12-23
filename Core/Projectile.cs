@@ -48,6 +48,8 @@ namespace Assets.Scripts.Core
 
             if (c.gameObject.tag == "Terrain")
                 c.GetComponent<BaseDestructibleScript>().onCollision(gameObject);
+            if (c.gameObject.tag == "InvulnTerrain")
+                Disable();
 
             if (!Piercing)
             {
