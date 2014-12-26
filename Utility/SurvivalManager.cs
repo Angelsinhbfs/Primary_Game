@@ -30,6 +30,7 @@ namespace Assets.Scripts.Utility
 
         void Start()
         {
+            SongTime = audio.clip.length;
             TimeRem = GetComponentInChildren<Text>();
             StartCoroutine(FirstWave());
             StartCoroutine(CountDown());
@@ -93,7 +94,7 @@ namespace Assets.Scripts.Utility
                 TimeRem.text = (SongTime - elapsedTime).ToString("F");
                 if (SongTime - elapsedTime <= 0)
                 {
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true, true);
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true, false);
                 }
                 else
                     yield return StartCoroutine(CountDown());

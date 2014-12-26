@@ -15,7 +15,7 @@ namespace Assets.Scripts.Core
         public bool canGenerateNewObjects;
         public GameObject optionalOwner = null;
 
-        void Start()
+        void Awake()
         {
             for (int i = 0; i < StartingCount; i++)
             {

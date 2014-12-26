@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Assets.Scripts.Core;
-using Pathfinding;
 using System.Collections.Generic;
 using Assets.Scripts.Utility;
 using Assets.Scripts.Player;
@@ -19,7 +18,6 @@ namespace Assets.Scripts.Enemy
         void Start()
         {
             Weapons = GetComponentsInChildren<WeaponMount>();
-            base.Start();
         }
 
         protected override void Attack()

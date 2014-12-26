@@ -20,7 +20,7 @@ namespace Assets.Scripts.Player
         private bool paused;
 
         public bool isRespawning = false;
-        private PolygonCollider2D collider;
+        private PolygonCollider2D _collider;
         private SpriteRenderer shipRend;
         //weapon variables
         public List<GameObject> Weapons;
@@ -99,7 +99,7 @@ namespace Assets.Scripts.Player
         // Use this for initialization
         void Awake()
         {
-            collider = GetComponent<PolygonCollider2D>();
+            _collider = GetComponent<PolygonCollider2D>();
             shipRend = GetComponentInChildren<SpriteRenderer>();
         }
         void Start()
@@ -120,7 +120,7 @@ namespace Assets.Scripts.Player
             BlueHp = MaxShieldHp;
             YellowHp = MaxShieldHp;
 
-            collider = GetComponent<PolygonCollider2D>();
+            _collider = GetComponent<PolygonCollider2D>();
 
 
         }
@@ -343,7 +343,7 @@ namespace Assets.Scripts.Player
             if (shieldActive && Color == color)
             {
                 //Debug.Log("Shield boost triggered");
-                HPShields = dmg;
+                HPShields = (int)(dmg * 0.5f);
             }
             else
             {
@@ -363,9 +363,9 @@ namespace Assets.Scripts.Player
 
         IEnumerator invulnToggle(int seconds)
         {
-            collider.enabled = !collider.enabled;
+            _collider.enabled = !_collider.enabled;
             yield return StartCoroutine(Flash((float)seconds/12f,seconds)); 
-            collider.enabled = true;
+            _collider.enabled = true;
         }
 
         IEnumerator Flash(float speed, int seconds)

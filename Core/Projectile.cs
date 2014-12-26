@@ -42,14 +42,14 @@ namespace Assets.Scripts.Core
             //Debug.Log(c.name);
             //Debug.Log(c);
             if (c.gameObject.transform.root.gameObject == Owner) return;
-
-            if (c.gameObject.tag != "Terrain" && c.gameObject.tag != "Bullet")
+            if (c.gameObject.tag == "InvulnTerrain")
+                Disable();
+            if (c.gameObject.tag != "Terrain" && c.gameObject.tag != "Bullet" && c.gameObject.tag != "InvulnTerrain")
                c.gameObject.GetComponent<Entity>().TakeDamage(Damage,color, Owner);
 
             if (c.gameObject.tag == "Terrain")
                 c.GetComponent<BaseDestructibleScript>().onCollision(gameObject);
-            if (c.gameObject.tag == "InvulnTerrain")
-                Disable();
+            
 
             if (!Piercing)
             {

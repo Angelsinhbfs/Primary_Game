@@ -40,8 +40,9 @@ namespace Assets.Scripts.Utility
         public void DoorDown()
         {
             if (Waves.Count == 0) return;
-            if (++currentWave == Waves.Count) return;
+            if (currentWave == Waves.Count) return;
             Waves[currentWave].SpawnWave();
+            currentWave++;
         }
 
         public void inEndZone()
@@ -84,7 +85,7 @@ namespace Assets.Scripts.Utility
                     break;
             }
             yield return StartCoroutine(StaticUtilities.Wait(5f));
-            if (elapsedTime > SongTime)
+            if (elapsedTime < SongTime)
                 yield return StartCoroutine(SpawnReinforcements());
         }
 

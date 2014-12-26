@@ -51,11 +51,9 @@ public class PlayerStatManager : MonoBehaviour
                 Kills[i] = 0;
                 TotScore[i] = 0;
             }
+            FirstRun = false;
         }
-        else
-        {
-                
-        }
+
     }
 
     public void OnLevelWasLoaded()
@@ -66,6 +64,8 @@ public class PlayerStatManager : MonoBehaviour
             Destroy(gameObject);
         }
         if(FirstRun) return;
+        menu = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<InputHandler>();
+        playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
         for (int i = 0; i < playerMan.NumberOfPlayers; i++)
         {
             var p = playerMan.PlayersScripts[i];
@@ -109,12 +109,13 @@ public class PlayerStatManager : MonoBehaviour
         //game lost or complete
         if (!isWin || isGameComplete)
         {
-            ContinueButton.enabled = false;
+            ContinueButton.gameObject.SetActive(false);
             EndTxt.text = isWin ? "Congratulations You Win!" : "Game Over";
         }
         else // level beaten but game not complete
         {
-            ContinueButton.enabled = true;
+            ContinueButton.gameObject.SetActive(true);
+            ContinueButton.Select();
             EndTxt.text = "Level Complete";
         }
     }
@@ -131,6 +132,7 @@ public class PlayerStatManager : MonoBehaviour
 
     public void LoadNextLevel()
     {
+        currentLevel = Application.loadedLevel;
         //timescale set to 1
         Time.timeScale = 1f;
         //animate end level summary out

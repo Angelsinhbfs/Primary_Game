@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using Assets.Scripts.Core;
-using Pathfinding;
 using System.Collections.Generic;
 using Assets.Scripts.Utility;
 using Assets.Scripts.Player;
@@ -28,7 +27,6 @@ namespace Assets.Scripts.Enemy
         protected PolyNavAgent agent;
 
         //The calculated path
-        public Path path;
         private int currentPatrolPoint;
         #endregion
 
@@ -43,18 +41,6 @@ namespace Assets.Scripts.Enemy
         protected bool dirtyPath = false;
         #endregion
 
-        // Use this for initialization
-        public void Start()
-        {
-            BuildPatrolPoints();
-            //Debug.Log(PatrolPoints);
-            agent = GetComponent<PolyNavAgent>();
-            PatrolPoints = StaticUtilities.ShuffleWaypointList(PatrolPoints);
-
-            agent.SetDestination(PatrolPoints[0].position);
-            currentPatrolPoint++;
-        }
-
         protected void BuildPatrolPoints()
         {
             var t = GameObject.FindGameObjectsWithTag("PatrolPoint");
@@ -65,12 +51,24 @@ namespace Assets.Scripts.Enemy
             }
             isPointsCollected = true;
         }
+
+        void Start()
+        {
+            agent = GetComponent<PolyNavAgent>();
+
+        }
         void OnEnable()
         {
+            if (agent == null) agent = GetComponent<PolyNavAgent>();
             Target = null;
             rigidbody2D.velocity = Vector2.zero;
             HP = MaxHp;
             InvokeRepeating("AssessTarget", 0.1f, 0.5f);
+            BuildPatrolPoints();
+            //Debug.Log(PatrolPoints);
+            PatrolPoints = StaticUtilities.ShuffleWaypointList(PatrolPoints);
+
+            agent.SetDestination(PatrolPoints[0].position);
         }
 
         public virtual void FixedUpdate()
@@ -80,6 +78,8 @@ namespace Assets.Scripts.Enemy
         }
         protected void doLogic()
         {
+            if (!isPointsCollected)
+                BuildPatrolPoints();
             AssessTarget();
             if (Target != null)
             {
@@ -144,6 +144,8 @@ namespace Assets.Scripts.Enemy
         {
              //builds patrol path and wanders
             if (!isPointsCollected) return;
+            if (!agent.pathPending && !agent.hasPath)//clear prime goal so it trys to calculate path again
+                agent.primeGoal = Vector2.zero;
             if (point != oldTargetPos || agent.activePath.Count == 0)
             {
                 agent.SetDestination(point);
@@ -206,15 +208,12 @@ namespace Assets.Scripts.Enemy
         public override void OnCollisionEnter2D(Collision2D c)
         {
             string t = c.gameObject.tag;
-            if (t == "Terrain")
-            {
-                rigidbody2D.velocity = -rigidbody2D.velocity;
+            if (t == "Terrain" || t == "InvulnTerrain")
                 return;
-            }
 
-            var v = rigidbody2D.velocity;
-            rigidbody2D.velocity = c.gameObject.rigidbody2D.velocity;
-            c.gameObject.rigidbody2D.velocity = 2*v;
+            //var v = rigidbody2D.velocity;
+            //rigidbody2D.velocity = c.gameObject.rigidbody2D.velocity;
+            //c.gameObject.rigidbody2D.velocity = 2*v;
 
             if(t == "Player")
             {

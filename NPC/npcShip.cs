@@ -12,12 +12,14 @@ namespace Assets.Scripts.NPC
         #region Variables
         //pathfinding
         private PolyNavAgent agent;
+        public int MaxHp;
         public List<Transform> WayPoints;
         private int currWaypoint = 0;
         #endregion
 
         void Start()
         {
+            HP = MaxHp;
             agent = GetComponent<PolyNavAgent>();
             if (WayPoints.Count == 0) throw new NotImplementedException("Waypoints not set");
 
@@ -27,15 +29,10 @@ namespace Assets.Scripts.NPC
         void OnEnable()
         {
             if (WayPoints.Count == 0) throw new NotImplementedException("Waypoints not set");
-
+            if (agent == null) agent = GetComponent<PolyNavAgent>();
             agent.SetDestination(WayPoints[0].position);
         }
 
-        public virtual void Update()
-        {
-            //check to see if paths have been opened up and ship should proceed
-
-        }
 
         public override void TakeDamage(int dmg, PrimaryEnums.Color color, GameObject Owner)
         {
@@ -83,6 +80,7 @@ namespace Assets.Scripts.NPC
         public override void Kill()
         {
             gameObject.SetActive(false);
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false, true);
         }
     }
 }

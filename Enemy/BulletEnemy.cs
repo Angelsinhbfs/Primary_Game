@@ -19,7 +19,6 @@ namespace Assets.Scripts.Enemy
         void Start()
         {
             Weapons = GetComponentsInChildren<WeaponMount>();
-            base.Start();
         }
 
         protected override void Attack()

@@ -26,10 +26,10 @@ namespace Assets.Scripts.NPC
 
         void OnTriggerEnter2D(Collider2D c)
         {
-            Debug.Log("entered goal zone");
+            //Debug.Log("entered goal zone");
             if (isOccupied) return;
             if (c.tag != TagToRespondTo) return;
-            Debug.Log("accepted tag");
+            //Debug.Log("accepted tag");
             isOccupied = true;
             protectMan.SendMessage("inEndZone");
             StartCoroutine(CountDown());

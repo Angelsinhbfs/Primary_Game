@@ -36,7 +36,7 @@ namespace Assets.Scripts.Enemy
             targets = tField.Targets;
             foreach (var t in targets)
             {
-                Debug.Log(Vector3.Distance(t.transform.position, transform.position));
+                //Debug.Log(Vector3.Distance(t.transform.position, transform.position));
                 if (!t.activeInHierarchy || Vector3.Distance(t.transform.position, transform.position) > Range)
                 {
                     tField.Targets.Remove(t);
@@ -57,6 +57,12 @@ namespace Assets.Scripts.Enemy
         {
             HP -= dmg;
             base.TakeDamage(dmg, color, Owner);
+        }
+
+        public override void Kill()
+        {
+            CancelInvoke();
+            gameObject.SetActive(false);
         }
 
     }

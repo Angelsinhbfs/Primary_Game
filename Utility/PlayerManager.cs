@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using Assets.Scripts.Core;
 using Assets.Scripts.Player;
 using Assets.Scripts.Utility;
-using Pathfinding;
 
 
 public class PlayerManager : MonoBehaviour 
