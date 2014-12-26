@@ -119,6 +119,7 @@ namespace Assets.Scripts.Enemy
                     {
                         Speed = (int)MaxSpeed;
                         agent.maxSpeed = Speed;
+                        if (Target == null) return;
                         TargetPos = Target.transform.TransformPoint(TargetTrackingOffset);
                         CheckPath(TargetPos);
                     }

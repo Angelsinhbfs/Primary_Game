@@ -46,6 +46,7 @@ namespace Assets.Scripts.Enemy
         Vector3 aim()
         {
             //Debug.Log("aiming");
+            if (Target == null) return transform.position;
             var t = Target.transform.position;
             var v = Target.rigidbody2D.velocity;
             t = new Vector3(t.x + v.x * leadTime, t.y + v.y * leadTime);

@@ -69,7 +69,8 @@ namespace Assets.Scripts.Weapon
             if (c.gameObject.tag == "Terrain") return;
             //Debug.Log(c.name);
             //Debug.Log(c);
-            c.GetComponent<Entity>().TakeDamage((int)CumulativeDmg, Owner);
+            if (c.gameObject.GetComponent<Entity>() != null)
+                c.GetComponent<Entity>().TakeDamage((int)CumulativeDmg,color, Owner);
             CumulativeDmg = 0;
         }
         protected override void Disable()

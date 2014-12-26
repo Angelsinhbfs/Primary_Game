@@ -102,9 +102,9 @@ public class PlayerManager : MonoBehaviour
             }
             Borders[3] = tempV;
 
-            foreach (Player p in PlayersScripts)
-            {
-                p.Borders = Borders;
+            for (int i = 0; i < NumberOfPlayers; i++)
+			{
+                PlayersScripts[i].Borders = Borders;
             }
         }
 	}

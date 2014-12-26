@@ -45,7 +45,8 @@ namespace Assets.Scripts.Core
             if (c.gameObject.tag == "InvulnTerrain")
                 Disable();
             if (c.gameObject.tag != "Terrain" && c.gameObject.tag != "Bullet" && c.gameObject.tag != "InvulnTerrain")
-               c.gameObject.GetComponent<Entity>().TakeDamage(Damage,color, Owner);
+               if(c.gameObject.GetComponent<Entity>() != null)
+                   c.gameObject.GetComponent<Entity>().TakeDamage(Damage, color, Owner);
 
             if (c.gameObject.tag == "Terrain")
                 c.GetComponent<BaseDestructibleScript>().onCollision(gameObject);

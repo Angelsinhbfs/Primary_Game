@@ -37,9 +37,10 @@ namespace Assets.Scripts.Enemy
             //Debug.Log("readying to fire");
             AssessTarget();
             if (Target == null) yield return 0;
+            var p = Target.transform.position;
             transform.up = aim();
             Speed = MaxSpeed * 1.15f;
-            float t = Vector2.Distance(Target.transform.position, transform.position) * 0.5f;
+            float t = Vector2.Distance(p, transform.position) * 0.5f;
             t /= getDV();
             yield return StartCoroutine(StaticUtilities.Wait(t));
             AssessTarget();
@@ -53,6 +54,7 @@ namespace Assets.Scripts.Enemy
 
         private void disengage()
         {
+            if (Target == null) return;
             var toAngle = Mathf.Atan2(Target.transform.position.y - transform.position.y, Target.transform.position.x - transform.position.x) * Mathf.Rad2Deg;// + (int)UnityEngine.Random.Range(0,1) * 180;
             transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.AngleAxis(toAngle, Vector3.forward),  turnSpeed);
             //Target = null;
@@ -61,6 +63,7 @@ namespace Assets.Scripts.Enemy
         Vector3 aim()
         {
             //Debug.Log("aiming");
+            if (Target == null) return transform.position;
             var t = Target.transform.position;
             t = t - transform.position;
             return t;

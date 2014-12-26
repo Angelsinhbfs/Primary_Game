@@ -69,7 +69,7 @@ namespace Assets.Scripts.Utility
 
         IEnumerator SpawnReinforcements()
         {
-            switch (UnityEngine.Random.Range(0, 1))
+            switch (UnityEngine.Random.Range(0, 2))
             {
                 case 0:
                     foreach (var s in Inner)
