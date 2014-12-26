@@ -15,7 +15,7 @@ namespace Assets.Scripts.Enemy
         public float leadTime;
         public float reloadTime;
 
-        void Start()
+        void Awake()
         {
             Weapons = GetComponentsInChildren<WeaponMount>();
         }

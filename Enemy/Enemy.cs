@@ -61,9 +61,10 @@ namespace Assets.Scripts.Enemy
         {
             if (agent == null) agent = GetComponent<PolyNavAgent>();
             Target = null;
+            isAttacking = false;
             rigidbody2D.velocity = Vector2.zero;
             HP = MaxHp;
-            InvokeRepeating("AssessTarget", 0.1f, 0.5f);
+            //InvokeRepeating("AssessTarget", 0.1f, 0.5f);
             BuildPatrolPoints();
             //Debug.Log(PatrolPoints);
             PatrolPoints = StaticUtilities.ShuffleWaypointList(PatrolPoints);
