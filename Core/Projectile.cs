@@ -44,6 +44,7 @@ namespace Assets.Scripts.Core
             if (c.gameObject.transform.root.gameObject == Owner) return;
             if (c.gameObject.tag == "InvulnTerrain")
                 Disable();
+            if (c.gameObject.layer == 20) return;
             if (c.gameObject.tag != "Terrain" && c.gameObject.tag != "Bullet" && c.gameObject.tag != "InvulnTerrain")
                if(c.gameObject.GetComponent<Entity>() != null)
                    c.gameObject.GetComponent<Entity>().TakeDamage(Damage, color, Owner);

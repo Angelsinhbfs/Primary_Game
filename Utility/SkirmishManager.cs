@@ -25,7 +25,7 @@ namespace Assets.Scripts.Utility
         private int currentSong = 0;
 
         //enemy management
-        private List<SpawnNode> Spawners = new List<SpawnNode>();
+        public List<SpawnNode> Spawners = new List<SpawnNode>();
         public float timeBetweenSpawns;
 
 
@@ -57,6 +57,7 @@ namespace Assets.Scripts.Utility
 
         void Update()
         {
+            if (paused) return;
             if(!audio.isPlaying && currentSong < songs.Length -1)
             {
                 currentSong++;

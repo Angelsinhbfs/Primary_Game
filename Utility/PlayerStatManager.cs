@@ -63,6 +63,7 @@ public class PlayerStatManager : MonoBehaviour
             Time.timeScale = 1f;
             Destroy(gameObject);
         }
+        DontDestroyOnLoad(gameObject);
         if(FirstRun) return;
         menu = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<InputHandler>();
         playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();

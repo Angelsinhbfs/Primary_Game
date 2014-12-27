@@ -201,7 +201,7 @@ namespace Assets.Scripts.Player
             HUD.Score = Score;
 
             // color debugging
-            HUD.color = color.ToString(); //if (HUD.Color.text != color.ToString()) 
+            //HUD.color = color.ToString(); //if (HUD.Color.text != color.ToString()) 
         }
 
         private void HandleInput()
@@ -304,6 +304,20 @@ namespace Assets.Scripts.Player
                 SelectedWeapon = 0;
             }
             if ((int)++color == PrimaryEnums.Color.GetValues(typeof(PrimaryEnums.Color)).Length) color = PrimaryEnums.Color.Yellow;
+            switch (color)
+            {
+                case PrimaryEnums.Color.Yellow:
+                    shield.SetColor(Color.yellow);
+                    break;
+                case PrimaryEnums.Color.Red:
+                    shield.SetColor(Color.red);
+                    break;
+                case PrimaryEnums.Color.Blue:
+                    shield.SetColor(Color.blue);
+                    break;
+                default:
+                    break;
+            }
             
         }
 
