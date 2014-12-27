@@ -69,7 +69,7 @@ namespace Assets.Scripts.Enemy
             //Debug.Log(PatrolPoints);
             PatrolPoints = StaticUtilities.ShuffleWaypointList(PatrolPoints);
 
-            agent.SetDestination(PatrolPoints[0].position);
+            //agent.SetDestination(PatrolPoints[0].position);
         }
 
         public virtual void FixedUpdate()

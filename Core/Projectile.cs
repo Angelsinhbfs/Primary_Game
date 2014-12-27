@@ -55,11 +55,13 @@ namespace Assets.Scripts.Core
             if (!Piercing)
             {
                 Disable();
+                //Debug.Log(c.gameObject);
             }
         }
 
         protected virtual void Disable()
         {
+            //Debug.Log("disabled");
             CancelInvoke();
             gameObject.SetActive(false);
 

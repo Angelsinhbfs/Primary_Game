@@ -53,7 +53,7 @@ namespace Assets.Scripts.NPC
                 captureTimer.text = (CaptureTime - elapsedTime).ToString("F");
                 if (CaptureTime - elapsedTime <= 0)
                 {
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true, true);
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true, false);
                 }
                 else
                     yield return StartCoroutine(CountDown());

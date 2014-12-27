@@ -103,7 +103,8 @@ namespace Assets.Scripts.Utility
                 else
                     yield return StartCoroutine(CountDown());
             }
-
+            else
+                yield return StartCoroutine(CountDown());
 
         }
 
