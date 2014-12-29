@@ -105,20 +105,8 @@ namespace Assets.Scripts.Utility
         //hierarchy.
         IEnumerator DisablePanelDeleyed(Animator anim)
         {
-            bool closedStateReached = false;
-            bool wantToClose = true;
-            while (!closedStateReached && wantToClose)
-            {
-                if (!anim.IsInTransition(0))
-                    closedStateReached = anim.GetCurrentAnimatorStateInfo(0).IsName(k_ClosedStateName);
-
-                wantToClose = !anim.GetBool(m_OpenParameterId);
-
-                yield return new WaitForEndOfFrame();
-            }
-
-            if (wantToClose)
-                anim.gameObject.SetActive(false);
+            yield return new WaitForEndOfFrame();
+            anim.gameObject.SetActive(false);
         }
 
         //Make the provided GameObject selected
@@ -145,7 +133,6 @@ namespace Assets.Scripts.Utility
             //non player input handling
             if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel != 0)
             {
-                Time.timeScale = 1f;
                 Application.LoadLevel(0);
             }
             if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel == 0) Application.Quit();

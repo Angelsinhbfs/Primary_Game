@@ -18,7 +18,7 @@ namespace Assets.Scripts.NPC
         {
             if (c.tag != "Player") return;
 
-            protectMan.SendMessage("DoorDown");
+            if(protectMan != null) protectMan.SendMessage("DoorDown");
             //Debug.Log("Door triggered");
             //add explosion particle effect call here
             //Destroy(transform.root.gameObject);

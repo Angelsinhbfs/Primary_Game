@@ -23,17 +23,20 @@ public class PlayerManager : MonoBehaviour
     public Player[] PlayersScripts = new Player[2];
     private Vector2[] Borders = new Vector2[4];
     private bool isEndScene;
+    private GameObject _gameManager;
 	// Use this for initialization
-	void Start () 
+    void Awake()
     {
-        //Debug.Log(GameObject.FindGameObjectsWithTag("GameManager")[0]);
+        _gameManager = GameObject.FindGameObjectWithTag("GameManager");
+        var g = _gameManager.GetComponent<PlayerStatManager>();
+        NumberOfPlayers = g.numberOfPlayers;
         SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
         for (int i = 0; i < NumberOfPlayers; i++)
         {
             var s = Random.Range(0, SpawnPoints.Length - 1);
             while (s == oldSpawn)
-	        {
-	         s = Random.Range(0, SpawnPoints.Length - 1);
+            {
+                s = Random.Range(0, SpawnPoints.Length - 1);
             }
             Players[i] = Instantiate(PlayerPrefab, SpawnPoints[s].transform.position, Quaternion.identity) as GameObject;
             oldSpawn = s;
@@ -42,7 +45,17 @@ public class PlayerManager : MonoBehaviour
             {
                 PlayersScripts[i].isPlayerOne = true;
             }
+
+            var p = PlayersScripts[i];
+            p.Lives = g.Lives[i];
+            p.Deaths = g.Deaths[i];
+            p.Kills = g.Kills[i];
         }
+    }
+	void Start () 
+    {
+        //Debug.Log(GameObject.FindGameObjectsWithTag("GameManager")[0]);
+        
 
         //make cameras for players
         if (NumberOfPlayers == 1)
@@ -129,7 +142,7 @@ public class PlayerManager : MonoBehaviour
                 isEndScene = true;
                 //put game over sectoin here
                 //Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>());
-                GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false, true);
+                GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
                 //display game over scene
                 //options to restart or go to menu
                 //

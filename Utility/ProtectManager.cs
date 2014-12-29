@@ -25,12 +25,19 @@ namespace Assets.Scripts.Utility
         public List<GameObject> OuterPatrolP;
         public List<GameObject> InnerPatrolP;
         public List<WaveList.WaveElement> Waves;
+        public float reinforcementWaveTime = 5f;
         private int currentWave = 0;
+        private bool levelComplete;
 
 
 
         #endregion
 
+        void Awake()
+        {
+            Debug.Log("awake ran");
+        }
+        
         void Start()
         {
             SongTime = audio.clip.length;
@@ -47,7 +54,7 @@ namespace Assets.Scripts.Utility
 
         public void inEndZone()
         {
-            Debug.Log("started goal waves");
+            //Debug.Log("started goal waves");
             foreach (var g in Inner)
             {
                 g.gameObject.SetActive(true);
@@ -84,7 +91,7 @@ namespace Assets.Scripts.Utility
                     }
                     break;
             }
-            yield return StartCoroutine(StaticUtilities.Wait(5f));
+            yield return StartCoroutine(StaticUtilities.Wait(reinforcementWaveTime));
             if (elapsedTime < SongTime)
                 yield return StartCoroutine(SpawnReinforcements());
         }
@@ -94,18 +101,16 @@ namespace Assets.Scripts.Utility
             yield return new WaitForSeconds(0.05f);
             if (!paused)
             {
-                elapsedTime += 0.05f;
+                elapsedTime = Time.timeSinceLevelLoad;
                 TimeRem.text = (SongTime - elapsedTime).ToString("F");
-                if (SongTime - elapsedTime <= 0)
+                if (SongTime - elapsedTime <= 0 && !levelComplete)
                 {
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false, true);
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
+                    levelComplete = true;
                 }
                 else
-                    yield return StartCoroutine(CountDown());
+                    StartCoroutine(CountDown());
             }
-            else
-                yield return StartCoroutine(CountDown());
-
         }
 
         public void OnPause()

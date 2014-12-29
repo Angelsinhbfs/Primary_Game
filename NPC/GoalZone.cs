@@ -16,7 +16,9 @@ namespace Assets.Scripts.NPC
         public string TagToRespondTo;
         private bool paused;
         private float elapsedTime;
+        private float startTime;
         public float CaptureTime;
+        private bool levelComplete;
 
         void Awake()
         {
@@ -32,6 +34,7 @@ namespace Assets.Scripts.NPC
             //Debug.Log("accepted tag");
             isOccupied = true;
             protectMan.SendMessage("inEndZone");
+            startTime = Time.timeSinceLevelLoad;
             StartCoroutine(CountDown());
 
         }
@@ -49,11 +52,12 @@ namespace Assets.Scripts.NPC
             yield return new WaitForSeconds(0.05f);
             if (!paused)
             {
-                elapsedTime += 0.05f;
-                captureTimer.text = (CaptureTime - elapsedTime).ToString("F");
-                if (CaptureTime - elapsedTime <= 0)
+                elapsedTime = Time.timeSinceLevelLoad - startTime;
+                if(captureTimer != null) captureTimer.text = (CaptureTime - elapsedTime).ToString("F");
+                if (CaptureTime - elapsedTime <= 0 && !levelComplete)
                 {
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true, false);
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true);
+                    levelComplete = true;
                 }
                 else
                     yield return StartCoroutine(CountDown());

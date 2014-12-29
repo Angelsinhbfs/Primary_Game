@@ -35,6 +35,12 @@ namespace Assets.Scripts.Core
             Right
         }
 
+        //public static enum CameraStyle
+        //{
+        //    Split,
+        //    Scaling
+        //}
+
         
     }
 }

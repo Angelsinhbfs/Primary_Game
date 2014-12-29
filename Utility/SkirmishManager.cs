@@ -28,6 +28,7 @@ namespace Assets.Scripts.Utility
         public List<SpawnNode> Spawners = new List<SpawnNode>();
         public float timeBetweenSpawns;
 
+        private bool levelComplete;
 
 
         #endregion
@@ -44,7 +45,7 @@ namespace Assets.Scripts.Utility
 
         void Start()
         {
-            //SongTime = audio.clip.length;
+            
             foreach (AudioClip a in songs)
             {
                 SongTime += a.length;
@@ -74,8 +75,11 @@ namespace Assets.Scripts.Utility
                 }
             }
 
-            if(Spawners.Count == 0)
-                GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true, true);
+            if (Spawners.Count == 0 && !levelComplete)
+            {
+                GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true);
+                levelComplete = true;
+            }
         }
 
         public void SpawnWave()
@@ -91,18 +95,17 @@ namespace Assets.Scripts.Utility
             yield return new WaitForSeconds(0.05f);
             if (!paused)
             {
-                elapsedTime += 0.05f;
+                elapsedTime = Time.timeSinceLevelLoad;
                 TimeRem.text = (SongTime - elapsedTime).ToString("F");
-                if (SongTime - elapsedTime <= 0)
+                if (SongTime - elapsedTime <= 0 && !levelComplete)
                 {
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false, true);
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
+                    levelComplete = true;
                 }
                 else
-                    yield return StartCoroutine(CountDown());
-            }
-            else
-                yield return StartCoroutine(CountDown());
+                    StartCoroutine(CountDown());
 
+            }
         }
 
         public void OnPause()

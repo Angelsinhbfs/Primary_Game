@@ -24,6 +24,21 @@ namespace Assets.Scripts.Utility
             return listToShuffle;
         }
 
+        public static int[] ShuffleIntArray(int[] input)
+        {
+            int temp = 0;
+            int r;
+            int count = input.Length;
+            for (int i = count - 1; i > 0; i--)
+            {
+                r = Random.Range(0, i + 1);
+                temp = input[i];
+                input[i] = input[r];
+                input[r] = temp;
+            }
+            return input;
+        }
+
         public static Quaternion XYLookRotation(Vector3 vectorA, Vector3 vectorB)
         {
             var d = vectorB - vectorA;

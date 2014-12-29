@@ -90,11 +90,11 @@ namespace Assets.Scripts.Utility
             yield return new WaitForSeconds(0.05f);
             if (!paused)
             {
-                elapsedTime += 0.05f;
+                elapsedTime = Time.timeSinceLevelLoad;
                 TimeRem.text = (SongTime - elapsedTime).ToString("F");
                 if (SongTime - elapsedTime <= 0)
                 {
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true, false);
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(true);
                 }
                 else
                     yield return StartCoroutine(CountDown());

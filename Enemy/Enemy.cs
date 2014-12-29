@@ -229,6 +229,8 @@ namespace Assets.Scripts.Enemy
         {
             paused = true;
             rigidbody2D.velocity = Vector2.zero;
+            agent.Stop();
+            CancelInvoke();
         }
 
         public void OnUnpause()

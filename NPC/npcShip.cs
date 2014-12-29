@@ -80,7 +80,7 @@ namespace Assets.Scripts.NPC
         public override void Kill()
         {
             gameObject.SetActive(false);
-            GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false, true);
+            GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
         }
     }
 }

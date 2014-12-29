@@ -368,6 +368,7 @@ namespace Assets.Scripts.Player
         }
         public override void Kill()
         {
+            HUD.HP = 0;
             CancelInvoke("Fire");
             isFireing = false;
             gameObject.SetActive(false);
@@ -399,6 +400,7 @@ namespace Assets.Scripts.Player
         {
             paused = true;
             rigidbody2D.velocity = Vector2.zero;
+            CancelInvoke();
         }
     }
 }

@@ -10,13 +10,14 @@ public class PlayerStatManager : MonoBehaviour
     public Button MenuButton;
     public Button ContinueButton;
     public Text LivesTxt, ScoreTxt, DeathsTxt, KillsTxt, EndTxt, TotScoreTxt;
+    public int numberOfPlayers;
     public int[] Lives ;
     public int[] Score ;
     public int[] Deaths;
     public int[] Kills ;
     public int[] TotScore;
 
-    public List<int> Levels;
+    public int[] Levels;
     private int currentLevel;
     private bool FirstRun = true;
     private InputHandler menu;
@@ -31,8 +32,9 @@ public class PlayerStatManager : MonoBehaviour
 
     public void Start()
     {
-        menu = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<InputHandler>();
-        playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
+        menu = gameObject.GetComponent<InputHandler>();
+        if (GameObject.FindGameObjectWithTag("SceneManagers") != null)
+            playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
         anim = gameObject.GetComponentInChildren<Animator>();
         //Debug.Log(menu);
         if (FirstRun)
@@ -43,7 +45,7 @@ public class PlayerStatManager : MonoBehaviour
             Kills = new int[2];
             TotScore = new int[2];
 
-            for (int i = 0; i < playerMan.NumberOfPlayers; i++)
+            for (int i = 0; i < numberOfPlayers; i++)
             {
                 Lives[i] = 3;
                 Score[i] = 0;
@@ -58,33 +60,29 @@ public class PlayerStatManager : MonoBehaviour
 
     public void OnLevelWasLoaded()
     {
+        //Debug.Log("levelloaded ran");
+        gameObject.SetActive(true);
         if(Application.loadedLevel == 0)
         {
-            Time.timeScale = 1f;
+            //Time.timeScale = 1f;
             Destroy(gameObject);
         }
         DontDestroyOnLoad(gameObject);
         if(FirstRun) return;
-        menu = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<InputHandler>();
+        menu = gameObject.GetComponent<InputHandler>();
         playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
-        for (int i = 0; i < playerMan.NumberOfPlayers; i++)
-        {
-            var p = playerMan.PlayersScripts[i];
-           p.Lives  =  Lives[i];
-           p.Score  =  Score[i];
-           p.Deaths =  Deaths[i];
-           p.Kills = Kills[i];
-        }
     }
 
-    public void LevelOver(bool isWin, bool isGameComplete)
+    public void LevelOver(bool isWin)
     {
+        bool isGameComplete = currentLevel == Levels.Length;
         //get end level stats
         for (int i = 0; i < playerMan.NumberOfPlayers; i++)
         {
             var p = playerMan.PlayersScripts[i];
+            Score[i] = p.Score;
+            p.Lives += Score[i] / 3000;
             Lives[i] =  p.Lives ;
-            Score[i] =  p.Score ;
             Deaths[i] = p.Deaths;
             Kills[i] = p.Kills;
             TotScore[i] += Score[i];
@@ -123,7 +121,7 @@ public class PlayerStatManager : MonoBehaviour
 
     IEnumerator LevelEndDelay()
     {
-        yield return new WaitForSeconds(0.6f);
+        yield return new WaitForEndOfFrame();
         Object[] objects = FindObjectsOfType(typeof(GameObject));
         foreach (GameObject g in objects)
         {
@@ -133,12 +131,10 @@ public class PlayerStatManager : MonoBehaviour
 
     public void LoadNextLevel()
     {
-        currentLevel = Application.loadedLevel;
-        //timescale set to 1
-        Time.timeScale = 1f;
+        
         //animate end level summary out
-        menu.CloseCurrent();
-        Application.LoadLevel(++currentLevel);
+        if(menu != null) menu.CloseCurrent();
+        Application.LoadLevel(Levels[currentLevel++]);
     }
 
     public void goMenu()
@@ -147,6 +143,7 @@ public class PlayerStatManager : MonoBehaviour
         menu.CloseCurrent();
         Application.LoadLevel(0);
     }
+
 
     void UpdateStats()
     {
