@@ -16,10 +16,11 @@ public class PlayerManager : MonoBehaviour
 
     public GameObject PlayerPrefab;
     public int NumberOfPlayers;
+    private int playersDead = 0;
     public int RespawnTime;
     private GameObject[] SpawnPoints;
     public int oldSpawn = -1;
-    public GameObject[] Players = new GameObject[2];
+    private GameObject[] Players = new GameObject[2];
     public Player[] PlayersScripts = new Player[2];
     private Vector2[] Borders = new Vector2[4];
     private bool isEndScene;
@@ -33,10 +34,10 @@ public class PlayerManager : MonoBehaviour
         SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
         for (int i = 0; i < NumberOfPlayers; i++)
         {
-            var s = Random.Range(0, SpawnPoints.Length - 1);
+            var s = Random.Range(0, SpawnPoints.Length);
             while (s == oldSpawn)
             {
-                s = Random.Range(0, SpawnPoints.Length - 1);
+                s = Random.Range(0, SpawnPoints.Length);
             }
             Players[i] = Instantiate(PlayerPrefab, SpawnPoints[s].transform.position, Quaternion.identity) as GameObject;
             oldSpawn = s;
@@ -58,13 +59,9 @@ public class PlayerManager : MonoBehaviour
         
 
         //make cameras for players
-        if (NumberOfPlayers == 1)
-        {
-            var ar = Resolution.x/Resolution.y;
-            cameraMan.BuildCamera(ar,ref Players[0], CameraFollowSpeed);
-        }
-        else
-            Make2PlayerCam();
+        var ar = Resolution.x/Resolution.y;
+        cameraMan.BuildCamera(ar, Players, CameraFollowSpeed);
+
 
         //find border limits
         var Bl = GameObject.FindGameObjectsWithTag("BorderLimits");
@@ -122,10 +119,6 @@ public class PlayerManager : MonoBehaviour
         }
 	}
 
-    private void Make2PlayerCam()
-    {
-        throw new System.NotImplementedException();
-    }
 	
 	// Update is called once per frame
 	void Update () 
@@ -135,19 +128,37 @@ public class PlayerManager : MonoBehaviour
             if (!Players[i].activeInHierarchy && PlayersScripts[i].Lives > 0 && !PlayersScripts[i].isRespawning)
             {
                 PlayersScripts[i].isRespawning = true;
-                StartCoroutine(Respawn(Players[i]));
+                if (NumberOfPlayers > 1)
+                {
+                    var o = i == 0 ? 1 : 0;
+                    if(Players[o].activeInHierarchy && !PlayersScripts[o].isRespawning)
+                        StartCoroutine(Respawn(Players[i],Players[o].transform.position));
+                }
+                else
+                    StartCoroutine(Respawn(Players[i]));
             }
             else if (!isEndScene && PlayersScripts[i].Lives == 0 && !PlayersScripts[i].isRespawning && !Players[i].activeInHierarchy)
             {
-                isEndScene = true;
-                //put game over sectoin here
-                //Debug.Log(GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>());
-                GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
-                //display game over scene
-                //options to restart or go to menu
-                //
+                if (NumberOfPlayers > 1)
+                {
+                    var o = i == 0 ? 1 : 0;
+                    if (!isEndScene && PlayersScripts[0].Lives == 0 && !PlayersScripts[0].isRespawning && !Players[0].activeInHierarchy)
+                    {
+                        isEndScene = true;
+
+                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
+                    }
+                }
+                else
+                {
+                    isEndScene = true;
+
+                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
+                }
+
             }
         }
+
 	}
 
     IEnumerator Respawn(GameObject p)
@@ -155,13 +166,19 @@ public class PlayerManager : MonoBehaviour
         p.GetComponent<Player>().Lives--;
         var sp = Random.Range(0, SpawnPoints.Length - 1);
         p.transform.position = SpawnPoints[sp].transform.position;
-        //SpawnPoints[sp].GetComponent<GraphUpdateScene>().setWalkability = false;
-        //SpawnPoints[sp].GetComponent<GraphUpdateScene>().Apply();
         yield return new WaitForSeconds(RespawnTime);
         p.SetActive(true);
         p.GetComponent<Player>().isRespawning = false;
         yield return new WaitForSeconds(0.5f);
-        //SpawnPoints[sp].GetComponent<GraphUpdateScene>().setWalkability = true;
-        //SpawnPoints[sp].GetComponent<GraphUpdateScene>().Apply();
+    }
+
+    IEnumerator Respawn(GameObject p, Vector3 location)
+    {
+        p.GetComponent<Player>().Lives--;
+        p.transform.position = location;
+        yield return new WaitForSeconds(RespawnTime * 0.66f);
+        p.SetActive(true);
+        p.GetComponent<Player>().isRespawning = false;
+        yield return new WaitForSeconds(0.5f);
     }
 }

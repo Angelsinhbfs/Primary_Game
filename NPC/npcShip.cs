@@ -30,7 +30,7 @@ namespace Assets.Scripts.NPC
         {
             if (WayPoints.Count == 0) throw new NotImplementedException("Waypoints not set");
             if (agent == null) agent = GetComponent<PolyNavAgent>();
-            agent.SetDestination(WayPoints[0].position);
+            //agent.SetDestination(WayPoints[0].position);
         }
 
 

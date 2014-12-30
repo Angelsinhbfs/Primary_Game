@@ -33,11 +33,7 @@ namespace Assets.Scripts.Utility
 
         #endregion
 
-        void Awake()
-        {
-            Debug.Log("awake ran");
-        }
-        
+
         void Start()
         {
             SongTime = audio.clip.length;

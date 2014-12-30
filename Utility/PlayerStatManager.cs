@@ -70,7 +70,7 @@ public class PlayerStatManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         if(FirstRun) return;
         menu = gameObject.GetComponent<InputHandler>();
-        playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
+        if( GameObject.FindGameObjectWithTag("SceneManagers") != null) playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
     }
 
     public void LevelOver(bool isWin)
@@ -88,15 +88,15 @@ public class PlayerStatManager : MonoBehaviour
             TotScore[i] += Score[i];
         }
         //set stats
-        KillsTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Kills: {0} Player 2 Kills: {1}", Kills[0], Kills[1]) :
+        KillsTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Kills: {0} \nPlayer 2 Kills: {1}", Kills[0], Kills[1]) :
                string.Format("Player 1 Kills: {0}", Kills[0]);
         //LivesTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("Player One Lives: {0} Player Two Lives: {1}", Lives[0], Lives[1]) :
         //    string.Format("Player One Lives: {0}", Lives[0]);
-        ScoreTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Score: {0} Player 2 Score: {1}", Score[0], Score[1]) :
+        ScoreTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Score: {0} \nPlayer 2 Score: {1}", Score[0], Score[1]) :
             string.Format("Player 1 Score: {0}", Score[0]);
-        DeathsTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Deaths: {0} Player 2 Deaths: {1}", Deaths[0], Deaths[1]) :
+        DeathsTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Deaths: {0} \nPlayer 2 Deaths: {1}", Deaths[0], Deaths[1]) :
             string.Format("Player 1 Deaths: {0}", Deaths[0]);
-        TotScoreTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("P1 Total Score: {0} P2 Total Score: {1}", TotScore[0] , TotScore[1] ) :
+        TotScoreTxt.text = playerMan.NumberOfPlayers > 1 ? string.Format("P1 Total Score: {0} \nP2 Total Score: {1}", TotScore[0] , TotScore[1] ) :
             string.Format("Player 1 Score: {0}", TotScore[0]);
 
         //animate in end level summary
@@ -109,6 +109,7 @@ public class PlayerStatManager : MonoBehaviour
         if (!isWin || isGameComplete)
         {
             ContinueButton.gameObject.SetActive(false);
+            MenuButton.Select();
             EndTxt.text = isWin ? "Congratulations You Win!" : "Game Over";
         }
         else // level beaten but game not complete

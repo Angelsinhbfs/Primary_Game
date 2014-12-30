@@ -16,6 +16,7 @@ namespace Assets.Scripts.Player
         public Vector2 Speed;
         public float FireRate;
         public bool isPlayerOne;
+        public bool isVersus;
         public int InvulnerableTime;
         private bool paused;
 
@@ -40,6 +41,7 @@ namespace Assets.Scripts.Player
         private Vector2 stickVector;
         public float drag;
         public Vector2[] Borders;
+        private Vector3 screenExtremes;
 
         public Rigidbody2D me;
 
@@ -49,7 +51,7 @@ namespace Assets.Scripts.Player
         public int Heat = 0;
         public int Deaths = 0;
         public int Kills = 0;
-        public Hud1Player HUD;
+        public Hud HUD;
         public Shield shield;
 
         //shield stats
@@ -114,7 +116,11 @@ namespace Assets.Scripts.Player
 
             me = rigidbody2D;
 
-            HUD = GameObject.FindGameObjectWithTag("Hud").GetComponent<Hud1Player>();
+            HUD = GameObject.FindGameObjectWithTag("Hud").GetComponent<Hud>();
+            if (!isPlayerOne)
+            {
+                HUD.enableP2Hud = true;
+            }
 
             RedHp = MaxShieldHp;
             BlueHp = MaxShieldHp;
@@ -122,6 +128,8 @@ namespace Assets.Scripts.Player
 
             _collider = GetComponent<PolygonCollider2D>();
 
+            screenExtremes = new Vector3(Camera.main.pixelWidth, Camera.main.pixelHeight, 0);
+            if (!isPlayerOne) gameObject.GetComponentInChildren<SpriteRenderer>().color = Color.magenta;
 
         }
         void OnEnable()
@@ -196,9 +204,53 @@ namespace Assets.Scripts.Player
 
         private void UpdateScore()
         {
-            HUD.HP = HP;
-            HUD.Lives = Lives;
-            HUD.Score = Score;
+            if (isPlayerOne)
+            {
+                HUD.P1HP = HP;
+                HUD.P1Lives = Lives;
+                HUD.P1Score = Score;
+                switch (color)
+                {
+                    case PrimaryEnums.Color.Yellow:
+                        HUD.P1color = Color.yellow;
+                        HUD.P1Shields = YellowHp;
+                        break;
+                    case PrimaryEnums.Color.Red:
+                        HUD.P1color = Color.red;
+                        HUD.P1Shields = RedHp;
+                        break;
+                    case PrimaryEnums.Color.Blue:
+                        HUD.P1color = Color.blue;
+                        HUD.P1Shields = BlueHp;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            else
+            {
+                HUD.P2HP = HP;
+                HUD.P2Lives = Lives;
+                HUD.P2Score = Score;
+                switch (color)
+                {
+                    case PrimaryEnums.Color.Yellow:
+                        HUD.P2color = Color.yellow;
+                        HUD.P2Shields = YellowHp;
+                        break;
+                    case PrimaryEnums.Color.Red:
+                        HUD.P2color = Color.red;
+                        HUD.P2Shields = RedHp;
+                        break;
+                    case PrimaryEnums.Color.Blue:
+                        HUD.P2color = Color.blue;
+                        HUD.P2Shields = BlueHp;
+                        break;
+                    default:
+                        break;
+                }
+            }
+            
 
             // color debugging
             //HUD.color = color.ToString(); //if (HUD.Color.text != color.ToString()) 
@@ -218,7 +270,10 @@ namespace Assets.Scripts.Player
             if (Speed.y > MaxSpeed) Speed.y = MaxSpeed;
             me.velocity = Speed;
             Speed *= drag;
-            transform.position = new Vector2(Mathf.Clamp(transform.position.x, Borders[0].x, Borders[2].x), Mathf.Clamp(transform.position.y, Borders[3].y, Borders[1].y));
+            var min = Camera.main.ScreenToWorldPoint(Vector3.zero);
+            var max = Camera.main.ScreenToWorldPoint(screenExtremes);
+            var ScreenPos = new Vector2(Mathf.Clamp(transform.position.x, min.x, max.x), Mathf.Clamp(transform.position.y, min.y, max.y));
+            transform.position = new Vector2(Mathf.Clamp(ScreenPos.x, Borders[0].x, Borders[2].x), Mathf.Clamp(ScreenPos.y, Borders[3].y, Borders[1].y));
             
             #endregion
 
@@ -368,7 +423,10 @@ namespace Assets.Scripts.Player
         }
         public override void Kill()
         {
-            HUD.HP = 0;
+            if (isPlayerOne)
+                HUD.P1HP = 0;
+            else
+                HUD.P2HP = 0;
             CancelInvoke("Fire");
             isFireing = false;
             gameObject.SetActive(false);

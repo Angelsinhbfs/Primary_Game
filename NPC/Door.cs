@@ -23,6 +23,7 @@ namespace Assets.Scripts.NPC
             //add explosion particle effect call here
             //Destroy(transform.root.gameObject);
             transform.root.gameObject.SetActive(false);
+            PolyNav2D.current.GenerateMap();
         }
     }
 }

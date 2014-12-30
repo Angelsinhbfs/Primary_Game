@@ -7,17 +7,17 @@ namespace Assets.Scripts.Utility
     public class CameraManager : MonoBehaviour
     {
         public GameObject CameraPrefab;
-        public void BuildCamera(float AspectRatio,ref GameObject Target,float FollwSpeed)
+        public void BuildCamera(float AspectRatio, GameObject[] Targets,float FollowSpeed)
         {
             var c = Instantiate(CameraPrefab) as GameObject;
             c.SetActive(false);
             var s = c.AddComponent<NonScaleCamera>();
 
-            s.Target = Target;
+            s.Targets = Targets;
             //Debug.Log("Target passed is: " + Target);
             //Debug.Log("Target recieved is: " + s.Target);
             s.baseAspect = AspectRatio;
-            s.FollowSpeed = FollwSpeed;
+            s.FollowSpeed = FollowSpeed;
             c.SetActive(true);
 
         }
