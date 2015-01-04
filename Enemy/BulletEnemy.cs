@@ -15,7 +15,24 @@ namespace Assets.Scripts.Enemy
         private WeaponMount[] Weapons;
         public float leadTime;
         public float reloadTime;
+        public float minRange;
 
+#if UNITY_EDITOR
+        void OnDrawGizmosSelected()
+        {
+            Gizmos.DrawWireSphere(transform.position, minRange);
+        }
+#endif
+        public override void FixedUpdate()
+        {
+            base.FixedUpdate();
+            if (Target == null) return;
+            if (Vector2.Distance(Target.transform.position, transform.position) < minRange)
+            {
+
+                agent.Stop();
+            }
+        }
         void Start()
         {
             Weapons = GetComponentsInChildren<WeaponMount>();
@@ -23,6 +40,7 @@ namespace Assets.Scripts.Enemy
 
         protected override void Attack()
         {
+
             StartCoroutine(ReadyFire());
         }
         IEnumerator ReadyFire()

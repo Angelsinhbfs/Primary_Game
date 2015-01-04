@@ -9,35 +9,38 @@ namespace Assets.Scripts.Utility
 {
     public static class StaticUtilities
     {
-        public static List<Transform> ShuffleWaypointList(List<Transform> listToShuffle)
+
+
+        public static List<T> ShuffleList <T>(List<T> listToShuffle)
         {
-            Transform temp = null;
+            
             int r;
             int count = listToShuffle.Count;
-            for (int i = count-1; i > 0; i--)
+            for (int i = count - 1; i > 0; i--)
             {
                 r = Random.Range(0, i + 1);
-                temp = listToShuffle[i];
+                var temp = listToShuffle[i];
                 listToShuffle[i] = listToShuffle[r];
                 listToShuffle[r] = temp;
             }
             return listToShuffle;
         }
 
-        public static int[] ShuffleIntArray(int[] input)
+        public static List<string> LevelDescription = new List<string>()
         {
-            int temp = 0;
-            int r;
-            int count = input.Length;
-            for (int i = count - 1; i > 0; i--)
-            {
-                r = Random.Range(0, i + 1);
-                temp = input[i];
-                input[i] = input[r];
-                input[r] = temp;
-            }
-            return input;
-        }
+            "Killing Fields\nSurvival",
+            "Hack The Planet\nProtection",
+            "Installation\nSkirmish",
+            "X\nSurvival",
+            "The Pit\nSurvival",
+            "Bubbles\nSkirmish",
+            "Bug Hunt\nSkirmish",
+            "Power Inside\nProtection",
+            "Hall of the mountain king",
+            "Asteroids",
+            "Arena",
+            "Tunnels"
+        };
 
         public static Quaternion XYLookRotation(Vector3 vectorA, Vector3 vectorB)
         {

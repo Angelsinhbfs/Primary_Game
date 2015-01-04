@@ -7,6 +7,7 @@ namespace Assets.Scripts.Weapon
 {
     public class Lazer :Projectile
     {
+        public float Width;
         private LineRenderer Renderer;
         private BoxCollider2D Area;
         private Vector3 EndPoint;
@@ -47,11 +48,12 @@ namespace Assets.Scripts.Weapon
         {
             MidPoint = new Vector3((transform.position.x + EndPoint.x) * 0.5f, (transform.position.y + EndPoint.y) * 0.5f);
             Area.center = transform.InverseTransformPoint(MidPoint);
-            Area.size = new Vector2(0.5f,Vector3.Distance(transform.position, EndPoint));
+            Area.size = new Vector2(Width,Vector3.Distance(transform.position, EndPoint));
         }
 
         private void UpdtateRendererPos()
         {
+            
             EndPoint += transform.up * Speed * Time.deltaTime;
             Renderer.SetPosition(1, transform.InverseTransformPoint(EndPoint));
         }

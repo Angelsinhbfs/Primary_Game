@@ -40,6 +40,7 @@ namespace Assets.Scripts.Player
         private bool isSwitching = false;
         private Vector2 stickVector;
         public float drag;
+        public float rotationSpeed;
         public Vector2[] Borders;
         private Vector3 screenExtremes;
 
@@ -128,7 +129,7 @@ namespace Assets.Scripts.Player
 
             _collider = GetComponent<PolygonCollider2D>();
 
-            screenExtremes = new Vector3(Camera.main.pixelWidth, Camera.main.pixelHeight, 0);
+            if(!isVersus) screenExtremes = new Vector3(Camera.main.pixelWidth, Camera.main.pixelHeight, 0);
             if (!isPlayerOne) gameObject.GetComponentInChildren<SpriteRenderer>().color = Color.magenta;
 
         }
@@ -270,10 +271,15 @@ namespace Assets.Scripts.Player
             if (Speed.y > MaxSpeed) Speed.y = MaxSpeed;
             me.velocity = Speed;
             Speed *= drag;
-            var min = Camera.main.ScreenToWorldPoint(Vector3.zero);
-            var max = Camera.main.ScreenToWorldPoint(screenExtremes);
-            var ScreenPos = new Vector2(Mathf.Clamp(transform.position.x, min.x, max.x), Mathf.Clamp(transform.position.y, min.y, max.y));
-            transform.position = new Vector2(Mathf.Clamp(ScreenPos.x, Borders[0].x, Borders[2].x), Mathf.Clamp(ScreenPos.y, Borders[3].y, Borders[1].y));
+            if (!isVersus)
+            {
+                var min = Camera.main.ScreenToWorldPoint(Vector3.zero);
+                var max = Camera.main.ScreenToWorldPoint(screenExtremes);
+                var ScreenPos = new Vector2(Mathf.Clamp(transform.position.x, min.x, max.x), Mathf.Clamp(transform.position.y, min.y, max.y));
+                transform.position = new Vector2(Mathf.Clamp(ScreenPos.x, Borders[0].x, Borders[2].x), Mathf.Clamp(ScreenPos.y, Borders[3].y, Borders[1].y));
+            }
+            else
+                transform.position = new Vector2(Mathf.Clamp(transform.position.x, Borders[0].x, Borders[2].x), Mathf.Clamp(transform.position.y, Borders[3].y, Borders[1].y));
             
             #endregion
 
@@ -282,7 +288,8 @@ namespace Assets.Scripts.Player
                 stickVector.x = Input.GetAxis(rStickH);
             if (Input.GetAxis(rStickV) > 0.2f || Input.GetAxis(rStickV) < -0.2f)
                 stickVector.y = Input.GetAxis(rStickV);
-            transform.rotation = Quaternion.AngleAxis(Mathf.Atan2(stickVector.y, stickVector.x) * Mathf.Rad2Deg + 90f, -Vector3.forward);
+            
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.AngleAxis(Mathf.Atan2(stickVector.y, stickVector.x) * Mathf.Rad2Deg + 90f, -Vector3.forward), Time.deltaTime * rotationSpeed);
             #endregion
 
             #region fire
@@ -290,6 +297,7 @@ namespace Assets.Scripts.Player
             if (SelectedWeapon != 2 && Input.GetAxis(rTrigger) > 0.25f && !isFireing)
             {
                 isFireing = true;
+                tField.SetActive(false);
                 InvokeRepeating("Fire", 0.1f, FireRate);
             }
             if (SelectedWeapon != 2 && Input.GetAxis(rTrigger) < 0.25f && isFireing)
@@ -307,6 +315,7 @@ namespace Assets.Scripts.Player
             if (SelectedWeapon == 2 && Input.GetAxis(rTrigger) < 0.25f && isFireing)
             {
                 Target = tField.GetComponent<TargettingField>().Targets;
+                tField.SetActive(false);
                 isFireing = false;
                 Invoke("Fire",0.1f);
                 //CancelInvoke("Fire");

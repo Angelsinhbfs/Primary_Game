@@ -7,21 +7,29 @@ using Assets.Scripts.Utility;
 public class PlayerStatManager : MonoBehaviour 
 {
     private PlayerManager playerMan;
+    private VSPlayerMan vsPlayerMan;
     public Button MenuButton;
     public Button ContinueButton;
     public Text LivesTxt, ScoreTxt, DeathsTxt, KillsTxt, EndTxt, TotScoreTxt;
     public int numberOfPlayers;
     public int[] Lives ;
     public int[] Score ;
+    public float[] VSScore;
     public int[] Deaths;
     public int[] Kills ;
     public int[] TotScore;
 
     public int[] Levels;
-    private int currentLevel;
+    public int currentLevel;
     private bool FirstRun = true;
     private InputHandler menu;
     private Animator anim;
+
+    public Text LoadingText;
+    public Slider ProgressBar;
+    public Image bg;
+
+    private bool isLoading;
 
 
     public void Awake()
@@ -33,14 +41,14 @@ public class PlayerStatManager : MonoBehaviour
     public void Start()
     {
         menu = gameObject.GetComponent<InputHandler>();
-        if (GameObject.FindGameObjectWithTag("SceneManagers") != null)
-            playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
+        
         anim = gameObject.GetComponentInChildren<Animator>();
         //Debug.Log(menu);
         if (FirstRun)
         {
             Lives = new int[2];
             Score = new int[2];
+            VSScore = new float[2];
             Deaths = new int[2];
             Kills = new int[2];
             TotScore = new int[2];
@@ -49,6 +57,7 @@ public class PlayerStatManager : MonoBehaviour
             {
                 Lives[i] = 3;
                 Score[i] = 0;
+                VSScore[i] = 0;
                 Deaths[i] =0;
                 Kills[i] = 0;
                 TotScore[i] = 0;
@@ -60,9 +69,10 @@ public class PlayerStatManager : MonoBehaviour
 
     public void OnLevelWasLoaded()
     {
+        isLoading = false;
         //Debug.Log("levelloaded ran");
         gameObject.SetActive(true);
-        if(Application.loadedLevel == 0)
+        if(Application.loadedLevel == 1)
         {
             //Time.timeScale = 1f;
             Destroy(gameObject);
@@ -70,7 +80,16 @@ public class PlayerStatManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         if(FirstRun) return;
         menu = gameObject.GetComponent<InputHandler>();
-        if( GameObject.FindGameObjectWithTag("SceneManagers") != null) playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
+        if (GameObject.FindGameObjectWithTag("SceneManagers") != null)
+        {
+            if (GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>() != null)
+                playerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<PlayerManager>();
+            if (GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<VSPlayerMan>() != null)
+                vsPlayerMan = GameObject.FindGameObjectWithTag("SceneManagers").GetComponent<VSPlayerMan>();
+        }
+        LoadingText.gameObject.SetActive(false);
+        ProgressBar.gameObject.SetActive(false);
+        bg.gameObject.SetActive(false);
     }
 
     public void LevelOver(bool isWin)
@@ -120,6 +139,52 @@ public class PlayerStatManager : MonoBehaviour
         }
     }
 
+    public void VSLevelOver(int winner)
+    {
+        bool isGameComplete = currentLevel == Levels.Length;
+        //get end level stats
+        for (int i = 0; i < vsPlayerMan.NumberOfPlayers; i++)
+        {
+            var p = vsPlayerMan.PlayersScripts[i];
+            p.Lives = 3;
+            VSScore[i] = (float)p.Kills*3 - p.Deaths * 2;
+            Lives[i] = p.Lives;
+            Deaths[i] = p.Deaths;
+            Kills[i] = p.Kills;
+        }
+        //set stats
+        KillsTxt.text = vsPlayerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Kills: {0} \nPlayer 2 Kills: {1}", Kills[0], Kills[1]) :
+               string.Format("Player 1 Kills: {0}", Kills[0]);
+        DeathsTxt.text = vsPlayerMan.NumberOfPlayers > 1 ? string.Format("Player 1 Deaths: {0} \nPlayer 2 Deaths: {1}", Deaths[0], Deaths[1]) :
+            string.Format("Player 1 Deaths: {0}", Deaths[0]);
+        
+
+        //animate in end level summary
+        menu.OpenPanel(anim);
+
+        //set timescale to 0
+        StartCoroutine(LevelEndDelay());
+
+        //game lost or complete
+        if (isGameComplete)
+        {
+            ContinueButton.gameObject.SetActive(false);
+            MenuButton.Select();
+            if (VSScore[0] != VSScore[1])
+            {
+                EndTxt.text = VSScore[0] > VSScore[1] ? "Player 1 Wins!" : "Player 2 Wins";
+            }
+            else
+                EndTxt.text = "Wow it's a tie";
+        }
+        else // level beaten but game not complete
+        {
+            ContinueButton.gameObject.SetActive(true);
+            ContinueButton.Select();
+            EndTxt.text = string.Format("Round Complete Player {0} Wins", winner + 1);
+        }
+    }
+
     IEnumerator LevelEndDelay()
     {
         yield return new WaitForEndOfFrame();
@@ -135,14 +200,14 @@ public class PlayerStatManager : MonoBehaviour
         
         //animate end level summary out
         if(menu != null) menu.CloseCurrent();
-        Application.LoadLevel(Levels[currentLevel++]);
+        StartCoroutine(LoadingScreen());
     }
 
     public void goMenu()
     {
         Time.timeScale = 1f;
         menu.CloseCurrent();
-        Application.LoadLevel(0);
+        Application.LoadLevel(1);
     }
 
 
@@ -157,4 +222,26 @@ public class PlayerStatManager : MonoBehaviour
             Kills[i] = p.Kills;
         }
     }
+
+    IEnumerator LoadingScreen()
+    {
+
+        LoadingText.gameObject.SetActive(true);
+        ProgressBar.gameObject.SetActive(true);
+        bg.gameObject.SetActive(true);
+        if (!isLoading)
+        {
+            isLoading = true;
+            LoadingText.text = StaticUtilities.LevelDescription[Levels[currentLevel] - 2];
+        }
+        AsyncOperation async = Application.LoadLevelAsync(Levels[currentLevel++]);
+
+        while (!async.isDone)
+        {
+            ProgressBar.value = async.progress;
+            yield return 0;
+        }
+
+    }
 }
+

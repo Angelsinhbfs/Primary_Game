@@ -74,7 +74,7 @@ namespace Assets.Scripts.NPC
 
         public void OnDestinationInvalid()
         {
-            StartCoroutine(TryPath());
+            //StartCoroutine(TryPath());
         }
 
         public override void Kill()

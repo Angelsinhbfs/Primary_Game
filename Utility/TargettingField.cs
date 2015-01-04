@@ -9,6 +9,7 @@ namespace Assets.Scripts.Utility
     public class TargettingField : MonoBehaviour
     {
         public List<GameObject> Targets;
+       
         public float AssessTime;
         public int MaxNumber;
         public bool isPlayerField;
@@ -33,7 +34,7 @@ namespace Assets.Scripts.Utility
         {
             
             if (!isPlayerField) return;
-            Debug.Log("on disable ran");
+            //Debug.Log("on disable ran");
             foreach (GameObject g in indicators.Pool)
             {
                 var i = g.GetComponentInChildren<TargetIndicator>();
@@ -45,6 +46,8 @@ namespace Assets.Scripts.Utility
         {
             if (Targets.Count < MaxNumber && c.GetComponent<Entity>() && c.GetComponent<Entity>().Locked == PrimaryEnums.LockOn.None)
             {
+               
+               
                 Targets.Add(c.gameObject);
                 c.GetComponent<Entity>().Locked = locker;
                 if(isPlayerField)

@@ -14,6 +14,7 @@ namespace Assets.Scripts.Utility
 
         //Currently Open Screen
         private Animator m_Open;
+        private Animator p_Open;
 
         //Hash of the parameter we use to control the transitions.
         private int m_OpenParameterId;
@@ -66,6 +67,11 @@ namespace Assets.Scripts.Utility
             SetSelected(go);
         }
 
+        public void OpenPrevious()
+        {
+            OpenPanel(p_Open);
+        }
+
         //Finds the first Selectable element in the providade hierarchy.
         static GameObject FindFirstEnabledSelectable(GameObject gameObject)
         {
@@ -89,7 +95,7 @@ namespace Assets.Scripts.Utility
         {
             if (m_Open == null)
                 return;
-
+            p_Open = m_Open;
             //Start the close animation.
             m_Open.SetBool(m_OpenParameterId, false);
 
@@ -131,11 +137,26 @@ namespace Assets.Scripts.Utility
         void Update()
         {
             //non player input handling
-            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel != 0)
+            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel != 1)
             {
-                Application.LoadLevel(0);
+                Application.LoadLevel(1);
             }
-            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel == 0) Application.Quit();
+            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel == 1) Application.Quit();
+        }
+
+        public void QuitGame()
+        {
+            Application.Quit();
+        }
+
+        public void DisableObject(GameObject o)
+        {
+            o.SetActive(false);
+        }
+
+        public void goMenu()
+        {
+            Application.LoadLevel(1);
         }
     }
 }

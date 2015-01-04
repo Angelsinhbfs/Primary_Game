@@ -6,7 +6,7 @@ using Assets.Scripts.Player;
 using Assets.Scripts.Utility;
 
 
-public class PlayerManager : MonoBehaviour 
+public class VSPlayerMan : MonoBehaviour
 {
 
     public CameraManager cameraMan;
@@ -24,13 +24,11 @@ public class PlayerManager : MonoBehaviour
     private Vector2[] Borders = new Vector2[4];
     private bool isEndScene;
     private GameObject _gameManager;
-	// Use this for initialization
+    // Use this for initialization
     void Awake()
     {
         _gameManager = GameObject.FindGameObjectWithTag("GameManager");
-        PlayerStatManager g = null;
-        if(_gameManager != null) 
-             g = _gameManager.GetComponent<PlayerStatManager>();
+        var g = _gameManager.GetComponent<PlayerStatManager>();
         NumberOfPlayers = g.numberOfPlayers;
         SpawnPoints = GameObject.FindGameObjectsWithTag("Respawn");
         for (int i = 0; i < NumberOfPlayers; i++)
@@ -49,22 +47,18 @@ public class PlayerManager : MonoBehaviour
             }
 
             var p = PlayersScripts[i];
+            p.isVersus = true;
             p.Lives = g.Lives[i];
             p.Deaths = g.Deaths[i];
             p.Kills = g.Kills[i];
         }
     }
-	void Start () 
+    void Start()
     {
-        //Debug.Log(GameObject.FindGameObjectsWithTag("GameManager")[0]);
-        
+        var ar = Resolution.x / Resolution.y;
+        cameraMan.BuildVSCamera(ar, Players, CameraFollowSpeed);
 
-        //make cameras for players
-        var ar = Resolution.x/Resolution.y;
-        cameraMan.BuildCamera(ar, Players, CameraFollowSpeed);
-
-
-        //find border limits
+        #region find border limits
         var Bl = GameObject.FindGameObjectsWithTag("BorderLimits");
         if (Bl == null || Bl.Length < 4) Debug.LogError("borders not found");
         else
@@ -114,57 +108,33 @@ public class PlayerManager : MonoBehaviour
             Borders[3] = tempV;
 
             for (int i = 0; i < NumberOfPlayers; i++)
-			{
+            {
                 PlayersScripts[i].Borders = Borders;
             }
         }
-	}
+        #endregion
+    }
 
-	
-	// Update is called once per frame
-	void Update () 
+
+    // Update is called once per frame
+    void Update()
     {
         for (int i = 0; i < NumberOfPlayers; i++)
         {
             if (!Players[i].activeInHierarchy && PlayersScripts[i].Lives > 0 && !PlayersScripts[i].isRespawning)
             {
                 PlayersScripts[i].isRespawning = true;
-                if (NumberOfPlayers > 1)
-                {
-                    var o = i == 0 ? 1 : 0;
-                    if(Players[o].activeInHierarchy && !PlayersScripts[o].isRespawning)
-                        StartCoroutine(Respawn(Players[i],Players[o].transform.position));
-                }
-                else
-                    StartCoroutine(Respawn(Players[i]));
+                StartCoroutine(Respawn(Players[i]));
             }
             else if (!isEndScene && PlayersScripts[i].Lives == 0 && !PlayersScripts[i].isRespawning && !Players[i].activeInHierarchy)
             {
-                if (NumberOfPlayers > 1)
-                {
-                    var o = i == 0 ? 1 : 0;
-                    if (!isEndScene && PlayersScripts[o].Lives == 0 && !PlayersScripts[o].isRespawning && !Players[o].activeInHierarchy)
-                    {
-                        isEndScene = true;
-
-                        GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
-                    }
-                    else
-                    {
-                        Players[i].transform.position = Players[o].transform.position;
-                    }
-                }
-                else
-                {
-                    isEndScene = true;
-
-                    GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().LevelOver(false);
-                }
-
+                var o = i == 0 ? 1 : 0;
+                isEndScene = true;
+                GameObject.FindGameObjectWithTag("GameManager").GetComponent<PlayerStatManager>().VSLevelOver(o);
             }
         }
 
-	}
+    }
 
     IEnumerator Respawn(GameObject p)
     {
@@ -172,16 +142,6 @@ public class PlayerManager : MonoBehaviour
         var sp = Random.Range(0, SpawnPoints.Length - 1);
         p.transform.position = SpawnPoints[sp].transform.position;
         yield return new WaitForSeconds(RespawnTime);
-        p.SetActive(true);
-        p.GetComponent<Player>().isRespawning = false;
-        yield return new WaitForSeconds(0.5f);
-    }
-
-    IEnumerator Respawn(GameObject p, Vector3 location)
-    {
-        p.GetComponent<Player>().Lives--;
-        p.transform.position = location;
-        yield return new WaitForSeconds(RespawnTime * 0.66f);
         p.SetActive(true);
         p.GetComponent<Player>().isRespawning = false;
         yield return new WaitForSeconds(0.5f);

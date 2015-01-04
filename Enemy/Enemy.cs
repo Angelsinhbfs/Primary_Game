@@ -67,7 +67,7 @@ namespace Assets.Scripts.Enemy
             //InvokeRepeating("AssessTarget", 0.1f, 0.5f);
             BuildPatrolPoints();
             //Debug.Log(PatrolPoints);
-            PatrolPoints = StaticUtilities.ShuffleWaypointList(PatrolPoints);
+            PatrolPoints = StaticUtilities.ShuffleList(PatrolPoints);
 
             //agent.SetDestination(PatrolPoints[0].position);
         }
@@ -110,11 +110,7 @@ namespace Assets.Scripts.Enemy
                     CheckPath(TargetPos);
                     break;
                 case PrimaryEnums.AiState.Attack:
-                    if (!isAttacking)
-                    {
-                        Attack();
-                        isAttacking = true;
-                    }
+                    
                     if (!isStationaryAttacker)
                     {
                         Speed = (int)MaxSpeed;
@@ -125,7 +121,11 @@ namespace Assets.Scripts.Enemy
                     }
                     else
                         agent.Stop();
-
+                    if (!isAttacking)
+                    {
+                        Attack();
+                        isAttacking = true;
+                    }
                     break;
                 default:
                     break;
