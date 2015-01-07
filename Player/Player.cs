@@ -36,6 +36,8 @@ namespace Assets.Scripts.Player
         private string rStickH;
         private string rTrigger;
         private string lTrigger;
+        private string rBumper;
+        private string lBumper;
         private bool isFireing = false;
         private bool isSwitching = false;
         private Vector2 stickVector;
@@ -95,6 +97,8 @@ namespace Assets.Scripts.Player
             }
         }
 
+        public bool isInvuln = false;
+
 
         private int _score = 0;
         public int Score { get { return _score; } set { _score += value; } }
@@ -114,6 +118,8 @@ namespace Assets.Scripts.Player
             rStickV = isPlayerOne ? "rStickVP1" : "rStickVP2";
             rTrigger = isPlayerOne ? "rTriggerP1" : "rTriggerP2";
             lTrigger = isPlayerOne ? "lTriggerP1" : "lTriggerP2";
+            rBumper = isPlayerOne ? "rBumperP1" : "rBumperP2";
+            lBumper = isPlayerOne ? "lBumperP1" : "lBumperP2";
 
             me = rigidbody2D;
 
@@ -294,25 +300,25 @@ namespace Assets.Scripts.Player
 
             #region fire
             //normal fire
-            if (SelectedWeapon != 2 && Input.GetAxis(rTrigger) > 0.25f && !isFireing)
+            if (SelectedWeapon != 2 && (Input.GetAxis(rTrigger) > 0.25f || Input.GetButtonDown(rBumper) ) && !isFireing)
             {
                 isFireing = true;
                 tField.SetActive(false);
                 InvokeRepeating("Fire", 0.1f, FireRate);
             }
-            if (SelectedWeapon != 2 && Input.GetAxis(rTrigger) < 0.25f && isFireing)
+            if (SelectedWeapon != 2 && (Input.GetAxis(rTrigger) < 0.25f || Input.GetButtonUp(rBumper)) && isFireing)
             {
                 isFireing = false;
                 CancelInvoke("Fire");
             }
 
             //smart fire
-            if (SelectedWeapon == 2 && Input.GetAxis(rTrigger) > 0.25f && !isFireing)
+            if (SelectedWeapon == 2 && (Input.GetAxis(rTrigger) > 0.25f || Input.GetButtonDown(rBumper)) && !isFireing)
             {
                 isFireing = true;
                 tField.SetActive(true);
             }
-            if (SelectedWeapon == 2 && Input.GetAxis(rTrigger) < 0.25f && isFireing)
+            if (SelectedWeapon == 2 && (Input.GetAxis(rTrigger) < 0.25f || Input.GetButtonUp(rBumper)) && isFireing)
             {
                 Target = tField.GetComponent<TargettingField>().Targets;
                 tField.SetActive(false);
@@ -418,6 +424,7 @@ namespace Assets.Scripts.Player
 
         public override void TakeDamage(int dmg, PrimaryEnums.Color Color, GameObject Owner)
         {
+            if (isInvuln) return;
             if (shieldActive && Color == color)
             {
                 //Debug.Log("Shield boost triggered");
@@ -445,9 +452,9 @@ namespace Assets.Scripts.Player
 
         IEnumerator invulnToggle(int seconds)
         {
-            _collider.enabled = !_collider.enabled;
-            yield return StartCoroutine(Flash((float)seconds/12f,seconds)); 
-            _collider.enabled = true;
+            isInvuln = true;
+            yield return StartCoroutine(Flash((float)seconds/12f,seconds));
+            isInvuln = false;
         }
 
         IEnumerator Flash(float speed, int seconds)

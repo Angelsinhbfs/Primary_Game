@@ -134,6 +134,8 @@ public class PlayerManager : MonoBehaviour
                     var o = i == 0 ? 1 : 0;
                     if(Players[o].activeInHierarchy && !PlayersScripts[o].isRespawning)
                         StartCoroutine(Respawn(Players[i],Players[o].transform.position));
+                    else
+                        StartCoroutine(Respawn(Players[i]));
                 }
                 else
                     StartCoroutine(Respawn(Players[i]));

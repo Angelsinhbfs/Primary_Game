@@ -137,11 +137,15 @@ namespace Assets.Scripts.Utility
         void Update()
         {
             //non player input handling
-            if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel != 1)
+            if ((Input.GetKeyDown(KeyCode.Escape) || Input.GetButtonDown("Cancel")) && Application.loadedLevel != 1)
             {
                 Application.LoadLevel(1);
             }
             if (Input.GetKeyDown(KeyCode.Escape) && Application.loadedLevel == 1) Application.Quit();
+            if( Input.GetButtonDown("Cancel") && Application.loadedLevel == 1)
+            {
+                OpenPrevious();
+            }
         }
 
         public void QuitGame()
